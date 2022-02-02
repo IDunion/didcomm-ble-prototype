@@ -8,7 +8,6 @@ export class BLEOutboundTransport implements OutboundTransport {
     private characteristic: string
     public supportedSchemes: string[] = ['blue', 'ble']
 
-
     public constructor(characteristic: string) {
         this.characteristic = characteristic
     }

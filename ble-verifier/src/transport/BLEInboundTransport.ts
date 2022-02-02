@@ -6,7 +6,6 @@ export class BLEInboundTransport implements InboundTransport {
     private logger!: Logger
 
     private characteristic: string
-    public supportedSchemes: string[] = ['blue', 'ble']
 
     public constructor(characteristic: string) {
         this.characteristic = characteristic

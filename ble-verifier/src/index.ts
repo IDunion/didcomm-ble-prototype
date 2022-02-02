@@ -1,5 +1,5 @@
 import type { InitConfig } from '@aries-framework/core'
-import type { Express } from 'express'
+import { Express, response } from 'express'
 
 import {
   ConnectionInvitationMessage,
@@ -11,13 +11,14 @@ import {
 import { agentDependencies, HttpInboundTransport } from '@aries-framework/node'
 import { startServer } from '@aries-framework/rest'
 import { static as stx } from 'express'
-import { connect } from 'ngrok'
 import { createExpressServer, useContainer } from 'routing-controllers'
-import { Container } from 'typedi'
 
 // import { CredDefService } from './controllers/CredDefService'
 import { TestLogger } from './logger'
-import { BCOVRIN_TEST_GENESIS } from './utils/utils'
+import * as utils from './utils/utils'
+import * as fs from 'fs'
+import * as jsYaml from 'js-yaml'
+import fetch from 'node-fetch'
 
 const logger = new TestLogger(process.env.NODE_ENV ? LogLevel.error : LogLevel.debug)
 
@@ -32,7 +33,50 @@ process.on('unhandledRejection', (error) => {
 })
 
 const run = async () => {
-  const endpoint = process.env.AGENT_ENDPOINT ?? (await connect(5001))
+
+  const configPath = process.env.CONFIG_PATH ?? './config/agent.yaml'
+  
+  // Read Config File
+  const file = fs.readFileSync(configPath, 'utf8');
+  const config: any = jsYaml.load(file);
+
+  // Set genesis transaction from either genesis url, network name or default to idunion
+  let network = "idunion"
+  let genesisTransactions = utils.gensis.get(network)
+
+  if (config.genesisurl) {
+    const response = await fetch(config.genesisurl)
+    if (response.ok) {
+      const content = await response.text()
+      genesisTransactions = content
+      network = ''
+      logger.debug('Setting genesis transactions from genesisurl')
+    } else {
+      logger.error('Could not read from genesis url')
+    }
+  } else {
+    if (config.network) {
+      let networkString: string = config.network
+      if ( utils.gensis.has(networkString)) {
+        genesisTransactions = utils.gensis.get(networkString.toLowerCase())
+        network = networkString
+        logger.debug('Setting genesis transaction to predefined network: ' + network)
+      } else {
+        logger.error('Could not find predefined network: ' + network)
+      }
+    } else {
+      logger.debug('No genesisurl or network name set, defaulting to: ' + network)
+    }
+  }
+
+  let mediatorConnectionsInvite: string = ''
+  if (config.mediatorinvite) {
+    mediatorConnectionsInvite = config.mediatorinvite
+    logger.debug('Found mediator invitation')
+  } else {
+    logger.debug('Mediator not set')
+  }
+
   const agentConfig: InitConfig = {
     label: 'ble-poc',
     walletConfig: {
@@ -41,18 +85,17 @@ const run = async () => {
     },
     indyLedgers: [
       {
-        id: 'BCOVRIN_TEST_GENESIS',
-        genesisTransactions: BCOVRIN_TEST_GENESIS,
+        id: network,
+        genesisTransactions: genesisTransactions,
         isProduction: false,
       },
     ],
     logger: logger,
-    publicDidSeed: process.env.AGENT_PUBLIC_DID_SEED,
-    endpoints: [endpoint],
     autoAcceptConnections: true,
-    autoAcceptCredentials: AutoAcceptCredential.ContentApproved,
+    autoAcceptCredentials: AutoAcceptCredential.Always,
     useLegacyDidSovPrefix: true,
-    connectionImageUrl: 'https://i.imgur.com/g3abcCO.png',
+    mediatorConnectionsInvite: mediatorConnectionsInvite,
+
   }
 
   const agent = new Agent(agentConfig, agentDependencies)
@@ -61,41 +104,9 @@ const run = async () => {
     port: 5001,
   })
 
-  agent.registerInboundTransport(httpInbound)
-
   agent.registerOutboundTransport(new HttpOutboundTransport())
 
   await agent.initialize()
-
-  const app: Express = createExpressServer({
-    controllers: [__dirname + '/controllers/**/*.ts', __dirname + '/controllers/**/*.js'],
-    cors: true,
-    routePrefix: '/demo',
-  })
-
-  httpInbound.app.get('/', async (req, res) => {
-    if (typeof req.query.c_i === 'string') {
-      try {
-        const invitation = await ConnectionInvitationMessage.fromUrl(req.url.replace('d_m=', 'c_i='))
-        res.send(invitation.toJSON())
-      } catch (error) {
-        res.status(500)
-        res.send({ detail: 'Unknown error occurred' })
-      }
-    }
-  })
-
-  app.use('/public', stx(__dirname + '/public'))
-
-//   const credDefService = new CredDefService(agent)
-//   useContainer(Container)
-//   Container.set(CredDefService, credDefService)
-
-
-  await startServer(agent, {
-    port: 5000,
-    app: app,
-  })
 }
 
 run()
