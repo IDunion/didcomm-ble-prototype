@@ -1,4 +1,4 @@
-import type { InitConfig } from '@aries-framework/core'
+import { InitConfig, MediatorPickupStrategy } from '@aries-framework/core'
 import {
   ConnectionInvitationMessage,
   LogLevel,
@@ -88,14 +88,11 @@ const run = async () => {
     autoAcceptCredentials: AutoAcceptCredential.Always,
     useLegacyDidSovPrefix: true,
     mediatorConnectionsInvite: mediatorConnectionsInvite,
-
+    mediatorPickupStrategy: MediatorPickupStrategy.Implicit,
+    mediatorPollingInterval: 5000,
   }
 
   const agent = new Agent(agentConfig, agentDependencies)
-
-  const httpInbound = new HttpInboundTransport({
-    port: 5001,
-  })
 
   agent.registerOutboundTransport(new HttpOutboundTransport())
 
