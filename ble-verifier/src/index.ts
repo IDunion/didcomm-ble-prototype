@@ -1,17 +1,20 @@
-import type { InitConfig } from '@aries-framework/core'
 import {
-  ConnectionInvitationMessage,
-  LogLevel,
-  Agent,
-  AutoAcceptCredential,
-  HttpOutboundTransport,
+    Agent,
+    AutoAcceptCredential,
+    HttpOutboundTransport, InitConfig, LogLevel, MediatorPickupStrategy, WsOutboundTransport
 } from '@aries-framework/core'
-import { agentDependencies, HttpInboundTransport } from '@aries-framework/node'
-import { TestLogger } from './utils/logger'
-import * as utils from './utils/utils'
+import { agentDependencies } from '@aries-framework/node'
 import * as fs from 'fs'
 import * as jsYaml from 'js-yaml'
 import fetch from 'node-fetch'
+import { AdminWebServer } from './admin/server'
+import { BLEInboundTransport } from './transport/BLEInboundTransport'
+import { BLEOutboundTransport } from './transport/BLEOutboundTransport'
+import { TestLogger } from './utils/logger'
+import * as utils from './utils/utils'
+
+
+
 
 const logger = new TestLogger(process.env.NODE_ENV ? LogLevel.error : LogLevel.debug)
 
@@ -28,7 +31,7 @@ process.on('unhandledRejection', (error) => {
 const run = async () => {
 
   const configPath = process.env.CONFIG_PATH ?? './config/agent.yaml'
-  
+
   // Read Config File
   const file = fs.readFileSync(configPath, 'utf8');
   const config: any = jsYaml.load(file);
@@ -50,7 +53,7 @@ const run = async () => {
   } else {
     if (config.network) {
       let networkString: string = config.network
-      if ( utils.gensis.has(networkString)) {
+      if (utils.gensis.has(networkString)) {
         genesisTransactions = utils.gensis.get(networkString.toLowerCase())
         network = networkString
         logger.debug('Setting genesis transaction to predefined network: ' + network)
@@ -88,18 +91,32 @@ const run = async () => {
     autoAcceptCredentials: AutoAcceptCredential.Always,
     useLegacyDidSovPrefix: true,
     mediatorConnectionsInvite: mediatorConnectionsInvite,
-
+    mediatorPickupStrategy: MediatorPickupStrategy.Implicit,
+    mediatorPollingInterval: 5000,
   }
 
   const agent = new Agent(agentConfig, agentDependencies)
 
-  const httpInbound = new HttpInboundTransport({
-    port: 5001,
-  })
-
+  // Default Transports
   agent.registerOutboundTransport(new HttpOutboundTransport())
+  agent.registerOutboundTransport(new WsOutboundTransport())
+
+  // BLE Transport
+  if (!config.blecharacteristic || !config.bleservice) {
+    logger.error('Could not find BLE characteristics or service UUIDs, terminating')
+    return;
+  }
+  const BLEInbound = new BLEInboundTransport(config.characteristic, config.bleservice)
+  agent.registerInboundTransport(BLEInbound)
+
+  const BLEOutbound = new BLEOutboundTransport(config.characteristic, config.bleservice)
+  agent.registerOutboundTransport(BLEOutbound)
 
   await agent.initialize()
+
+  // Admin webservice 
+  const webserver = new AdminWebServer(logger, agent)
+  await webserver.listen(8080)
 }
 
 run()

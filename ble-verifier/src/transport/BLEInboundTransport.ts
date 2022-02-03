@@ -6,9 +6,11 @@ export class BLEInboundTransport implements InboundTransport {
     private logger!: Logger
 
     private characteristic: string
+    private service: string
 
-    public constructor(characteristic: string) {
+    public constructor(characteristic: string, service: string) {
         this.characteristic = characteristic
+        this.service = service
     }
 
     public async start(agent: Agent): Promise<void> {
