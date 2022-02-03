@@ -1,6 +1,4 @@
 import type { InitConfig } from '@aries-framework/core'
-import { Express, response } from 'express'
-
 import {
   ConnectionInvitationMessage,
   LogLevel,
@@ -9,12 +7,7 @@ import {
   HttpOutboundTransport,
 } from '@aries-framework/core'
 import { agentDependencies, HttpInboundTransport } from '@aries-framework/node'
-import { startServer } from '@aries-framework/rest'
-import { static as stx } from 'express'
-import { createExpressServer, useContainer } from 'routing-controllers'
-
-// import { CredDefService } from './controllers/CredDefService'
-import { TestLogger } from './logger'
+import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
 import * as fs from 'fs'
 import * as jsYaml from 'js-yaml'
