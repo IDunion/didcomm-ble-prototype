@@ -10,7 +10,10 @@ export const didcommCharacteristic = new BlenoCharacteristic({
     // secure: [ ... ], // enable security for properties, can be a combination of 'read', 'write', 'writeWithoutResponse', 'notify', 'indicate'
     value: null, // optional static value, must be of type Buffer - for read only characteristics
     descriptors: [
-        // see Descriptor for data type
+      new bleno.Descriptor({
+        uuid: '2901',
+        value: 'Gets or sets.'
+      })
     ],
     onReadRequest: null, // optional read request handler, function(offset, callback) { ... }
     onWriteRequest: null, // optional write request handler, function(data, offset, withoutResponse, callback) { ...}
