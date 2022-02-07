@@ -1,8 +1,6 @@
-let util = require('util');
-
 import bleno from '@abandonware/bleno'
 
-let BlenoCharacteristic = bleno.Characteristic;
+const BlenoCharacteristic = bleno.Characteristic;
 
 export const didcommCharacteristic = new BlenoCharacteristic({
     uuid: 'fffffffffffffffffffffffffffffff1', // or 'fff1' for 16-bit
