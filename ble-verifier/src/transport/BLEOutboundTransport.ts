@@ -32,7 +32,9 @@ export class BLEOutboundTransport implements OutboundTransport {
 
     public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {
         const deviceUUID = outboundPackage.endpoint
-        deviceUUID?.replace('ble://', '')
+        this.supportedSchemes.forEach(element => {
+            deviceUUID?.replace(element + '://', '')
+        })
         on('discover', async(peripheral: Peripheral) => {
             this.logger.debug('Found BLE device ' + peripheral.uuid)
             if (peripheral.uuid == deviceUUID) {
