@@ -11,6 +11,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
+    "@abandonware/noble": "1.9.2-15",
     "@aries-framework/core": "0.1.0",
     "@aries-framework/node": "0.1.0",
     "@aries-framework/rest": "^0.7.0",
