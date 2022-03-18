@@ -17,7 +17,7 @@ export class AdminWebServer {
 
         // Create express app
         const app = express()
-        app.use(bodyParser.urlencoded({ extended: false }));
+        app.use(bodyParser.json());
         this.app = app
 
         // Regsiter default routes
