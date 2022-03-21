@@ -31,7 +31,7 @@ export class BLEOutboundTransport implements OutboundTransport {
     }
 
     public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {
-        const deviceUUID = outboundPackage.endpoint
+        let deviceUUID = outboundPackage.endpoint
         this.supportedSchemes.forEach(element => {
             deviceUUID?.replace(element + '://', '')
         })
