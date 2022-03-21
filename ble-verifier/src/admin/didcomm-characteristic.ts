@@ -3,13 +3,15 @@ import bleno from '@abandonware/bleno'
 export class didcommCharacteristic extends bleno.Characteristic {
   _value: any;
   _updateValueCallback: any;
+  cBleWrite: any;
 
-  constructor(blecharacteristic: string) {
+  constructor(blecharacteristic: string, cBleWrite: any) {
     super({
       uuid: blecharacteristic,
       properties: ['read', 'write', 'notify'],
       value: null
     });
+    this.cBleWrite = cBleWrite;
     this._value = new ArrayBuffer(0);
     this._value = [74, 65, 73, 74]
     this._updateValueCallback = null;
@@ -19,10 +21,15 @@ export class didcommCharacteristic extends bleno.Characteristic {
     callback(bleno.Characteristic.RESULT_SUCCESS, this._value);
   }
 
+  callbackBleServer(message: Buffer){
+    this.cBleWrite(message)
+  }
+
   onWriteRequest(data: any, offset: number, withoutResponse: boolean, callback: any) {
     this._value = data;
-    console.log(data.toString('hex'));
-    console.log(data);
+    // console.log(data.toString('hex'));
+    // console.log(data);
+    this.callbackBleServer(data)
     if (this._updateValueCallback) {
       this._updateValueCallback(this._value);
     }
