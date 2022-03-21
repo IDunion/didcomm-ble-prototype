@@ -1,50 +1,131 @@
-import bleno from '@abandonware/bleno'
-import { BLEOutboundTransport } from '../transport/BLEOutboundTransport'
-import { didcommCharacteristic } from './didcomm-characteristic'
-import { didcommService } from './didcomm-service'
+import Bleno from '@abandonware/bleno'
 
+export class didcommCharacteristic extends Bleno.Characteristic {
+  _value: any;
+  _updateValueCallback: any;
 
-export class BLEServer {
-  private characteristics: string[]
-  private service: string
-  private BlenoPrimaryService: any //bleno.PrimaryService
-
-  // private name: string
-
-  constructor(characteristics: string[], service: string) {
-    this.characteristics = characteristics
-    this.service = service
-    this.BlenoPrimaryService = bleno.PrimaryService
-
-    console.log('bleno - echo');
-
-    bleno.on('stateChange', function (state) {
-      console.log('on -> stateChange: ' + state);
-
-      if (state === 'poweredOn') {
-        bleno.startAdvertising('ble-didcomm', [didcommService.uuid], function (err) {
-          if (err) {
-            console.log(err);
-          }
-        });
-      } else {
-        bleno.stopAdvertising();
-      }
+  constructor(blecharacteristic: string) {
+    super({
+      uuid: blecharacteristic,
+      properties: ['read', 'write', 'notify'],
+      value: null
     });
-
-    bleno.on('advertisingStart', (error) => {
-      console.log('on -> advertisingStart: ' + (error ? 'error ' + error : 'success'));
-
-      if (!error) {
-        bleno.setServices([didcommService
-        ]);
-      }
-    });
-
-    // Create express app
-    // Register default routes
+    this._value = new ArrayBuffer(0);
+    this._value = [74, 65, 73, 74]
+    this._updateValueCallback = null;
   }
 
+  onReadRequest(offset: number, callback: any) {
+    callback(Bleno.Characteristic.RESULT_SUCCESS, this._value);
+  }
 
+  onWriteRequest(data: any, offset: number, withoutResponse: boolean, callback: any) {
+    this._value = data;
+    console.log(data.toString('hex'));
+    console.log(data);
+    if (this._updateValueCallback) {
+      this._updateValueCallback(this._value);
+    }
 
+    callback(Bleno.Characteristic.RESULT_SUCCESS);
+  }
+
+  onSubscribe(maxValueSize: number, updateValueCallback: any) {
+    this._updateValueCallback = updateValueCallback;
+  }
+
+  onUnsubscribefunction() {
+    this._updateValueCallback = null;
+  }
 }
+
+const SERVICE_UUID = 'a422a59a-71fe-11eb-9439-0242ac130002';
+
+export class bleServer {
+  private isAdvertising: boolean;
+  private blecharacteristic: string
+  private bleservice: string
+
+  constructor(blecharacteristic: string, bleservice: string) {
+    this.isAdvertising = false;
+    this.blecharacteristic = blecharacteristic
+    this.bleservice = bleservice
+    this.setup(this.blecharacteristic, this.bleservice);
+    // console.log(this.blecharacteristic)
+    // console.log(this.bleservice)
+  }
+
+  toString(): string {
+    return '<Control>';
+  }
+
+  dispose(callback: () => void) {
+    if (this.isAdvertising) {
+      Bleno.stopAdvertising(callback);
+    } else {
+      callback();
+    }
+  }
+
+  private setup(blecharacteristic: string, bleservice: string) {
+    // Bleno.on('stateChange', (state: string) => {
+    //   console.log('bluetooth', `stateChange: ${state}, address = ${Bleno.address}`);
+
+    //   if (state === 'poweredOn') {
+    //     Bleno.startAdvertising('device', [SERVICE_UUID]);
+    //   } else {
+    //     Bleno.stopAdvertising();
+    //   }
+    // });
+
+    Bleno.on('accept', (clientAddress: string) => {
+      console.log('bluetooth', `accept, client: ${clientAddress}`);
+      Bleno.updateRssi();
+    });
+
+    Bleno.on('disconnect', (clientAddress: string) => {
+      console.log('bluetooth', `disconnect, client: ${clientAddress}`);
+    });
+
+    Bleno.on('rssiUpdate', (rssi: number) => {
+      console.log('bluetooth', `rssiUpdate: ${rssi}`);
+    });
+
+    Bleno.on('mtuChange', (mtu: number) => {
+      console.log('bluetooth', `mtuChange: ${mtu}`);
+    });
+
+    Bleno.on('advertisingStop', () => {
+      this.isAdvertising = false;
+      console.log('bluetooth', 'advertisingStop');
+    });
+
+    Bleno.on('servicesSet', (error?: Error | null) => {
+      console.log('bluetooth', `servicesSet: ${error ? error : 'success'}`);
+    });
+
+    Bleno.on('stateChange', (state: string) => {
+      if (state === 'poweredOn') {
+        Bleno.startAdvertising('ble-didcomm', [this.bleservice], () => { });
+      } else {
+        Bleno.stopAdvertising(() => { });
+      }
+    });
+
+    const characteristic = new didcommCharacteristic(blecharacteristic);
+    
+    Bleno.on('advertisingStart', (error?: Error | null) => {
+      if (!error) {
+        Bleno.setServices(
+          [new Bleno.PrimaryService({ uuid: 'a422a59a-71fe-11eb-9439-0242ac130003', characteristics: [characteristic] })],
+          () => { }
+        );
+      }
+    });
+  }
+
+  private onWriteRequest(data: Buffer) {
+    console.log(data.toString('hex'));
+  }
+}
+

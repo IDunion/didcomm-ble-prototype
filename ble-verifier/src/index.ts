@@ -104,10 +104,10 @@ const run = async () => {
     logger.error('Could not find BLE characteristics or service UUIDs, terminating')
     return;
   }
-  const BLEInbound = new BLEInboundTransport(config.characteristic, config.bleservice)
+  const BLEInbound = new BLEInboundTransport(config.blecharacteristic, config.bleservice)
   agent.registerInboundTransport(BLEInbound)
 
-  const BLEOutbound = new BLEOutboundTransport(config.characteristic, config.bleservice)
+  const BLEOutbound = new BLEOutboundTransport(config.blecharacteristic, config.bleservice)
   agent.registerOutboundTransport(BLEOutbound)
 
   await agent.initialize()
