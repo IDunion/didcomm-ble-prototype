@@ -14,14 +14,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@abandonware/bleno": "^0.5.1-4",
+    "@abandonware/bluetooth-hci-socket": "^0.5.3-7",
     "@aries-framework/core": "0.1.0",
     "@aries-framework/node": "^0.1.0",
     "@aries-framework/rest": "^0.7.0",
-    "@types/bleno": "^0.4.2",
-    "@types/cron": "^1.7.3",
-    "@types/express": "^4.17.13",
-    "@types/js-yaml": "^4.0.5",
-    "@types/uuid": "^8.3.3",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
     "cron": "^1.8.2",
@@ -31,7 +27,11 @@
     "tslog": "^3.3.1"
   },
   "devDependencies": {
+    "@types/cron": "^1.7.3",
+    "@types/express": "^4.17.13",
+    "@types/js-yaml": "^4.0.5",
     "@types/node": "^15.14.4",
+    "@types/uuid": "^8.3.3",
     "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
     "eslint": "^8.8.0",

@@ -1,14 +1,15 @@
 import bleno from '@abandonware/bleno'
 
-const BlenoCharacteristic = bleno.Characteristic;
+const Characteristic = bleno.Characteristic;
+const Descriptor = bleno.Descriptor;
 
-export const didcommCharacteristic = new BlenoCharacteristic({
-    uuid: 'fffffffffffffffffffffffffffffff1', // or 'fff1' for 16-bit
+export const didcommCharacteristic = new Characteristic({
+    uuid: '0d3a0e3a-b86d-46cb-99d9-61c37ebeeac1', // or 'fff1' for 16-bit
     properties: ['read', 'write', 'notify'], // can be a combination of 'read', 'write', 'writeWithoutResponse', 'notify', 'indicate'
     // secure: [ ... ], // enable security for properties, can be a combination of 'read', 'write', 'writeWithoutResponse', 'notify', 'indicate'
     value: null, // optional static value, must be of type Buffer - for read only characteristics
     descriptors: [
-      new bleno.Descriptor({
+      new Descriptor({
         uuid: '2901',
         value: 'Gets or sets.'
       })

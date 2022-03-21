@@ -18,7 +18,7 @@ export class BLEInboundTransport implements InboundTransport {
         const agentConfig = agent.injectionContainer.resolve(AgentConfig)
         this.logger = agentConfig.logger
         this.logger.debug('Starting BLE inbound transport')
-        let ble = new BLEServer(["characteristic"], "service")
+        const ble = new BLEServer(["characteristic"], "service")
 
 
     }
