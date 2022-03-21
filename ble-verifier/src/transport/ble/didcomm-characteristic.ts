@@ -1,5 +1,6 @@
 import bleno from '@abandonware/bleno'
 
+
 export class didcommCharacteristic extends bleno.Characteristic {
   _value: any;
   _updateValueCallback: any;
@@ -12,16 +13,16 @@ export class didcommCharacteristic extends bleno.Characteristic {
       value: null
     });
     this.cBleWrite = cBleWrite;
-    this._value = new ArrayBuffer(0);
-    this._value = [74, 65, 73, 74]
+    this._value = Buffer.from("Test");
     this._updateValueCallback = null;
+
   }
 
   onReadRequest(offset: number, callback: any) {
     callback(bleno.Characteristic.RESULT_SUCCESS, this._value);
   }
 
-  callbackBleServer(message: Buffer){
+  callbackBleServer(message: Buffer) {
     this.cBleWrite(message)
   }
 

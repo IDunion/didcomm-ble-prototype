@@ -1,6 +1,6 @@
 import type { Agent, InboundTransport, Logger } from '@aries-framework/core'
 import { AgentConfig } from '@aries-framework/core'
-import { bleServer } from '../admin/bleserver'
+import { bleServer } from './ble/bleserver'
 
 export class BLEInboundTransport implements InboundTransport {
     private agent!: Agent

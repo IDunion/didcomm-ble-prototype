@@ -1,8 +1,6 @@
 import Bleno from '@abandonware/bleno'
 import { didcommCharacteristic } from './didcomm-characteristic'
 
-// const SERVICE_UUID = 'a422a59a-71fe-11eb-9439-0242ac130002';
-
 export class bleServer {
   private isAdvertising: boolean;
   private blecharacteristic: string
@@ -32,15 +30,6 @@ export class bleServer {
   }
 
   private setup(blecharacteristic: string, bleservice: string, cBleWrite: any) {
-    // Bleno.on('stateChange', (state: string) => {
-    //   console.log('bluetooth', `stateChange: ${state}, address = ${Bleno.address}`);
-
-    //   if (state === 'poweredOn') {
-    //     Bleno.startAdvertising('device', [SERVICE_UUID]);
-    //   } else {
-    //     Bleno.stopAdvertising();
-    //   }
-    // });
 
     Bleno.on('accept', (clientAddress: string) => {
       console.log('bluetooth', `accept, client: ${clientAddress}`);

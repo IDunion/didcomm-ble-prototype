@@ -14,11 +14,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@abandonware/bleno": "^0.5.1-4",
-    "@abandonware/noble": "1.9.2-15",
     "@abandonware/bluetooth-hci-socket": "^0.5.3-7",
+    "@abandonware/noble": "1.9.2-15",
     "@aries-framework/core": "0.1.0",
     "@aries-framework/node": "^0.1.0",
-    "@aries-framework/rest": "^0.7.0",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
     "cron": "^1.8.2",
