@@ -18,9 +18,13 @@ export class BLEInboundTransport implements InboundTransport {
         const agentConfig = agent.injectionContainer.resolve(AgentConfig)
         this.logger = agentConfig.logger
         this.agent = agent
-        this.logger.debug('Starting BLE inbound transport')
-        let boundCallback = this.cBleWrite.bind(this)
-        const ble = new bleServer(this.blecharacteristic, this.bleservice, boundCallback)
+        agentConfig.logger.debug(`Starting HTTP inbound transport`, {
+            ServiceUUID: this.bleservice,
+            CharacteristicsUUID: this.blecharacteristic,
+          })
+
+        let boundcBleWrite = this.cBleWrite.bind(this)
+        const ble = new bleServer(this.blecharacteristic, this.bleservice, boundcBleWrite)
     }
 
     // Callback for write request on bleCharacateristic
