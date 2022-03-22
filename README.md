@@ -1,6 +1,3 @@
-Ref:
-https://medium.com/@AnimoSolutions/how-to-install-libindy-for-linux-to-use-with-aries-framework-javascript-3470453dd233
-https://github.com/abandonware/bleno
 # Scope
 This repository is meant as a technical demonstration of DIDcomm via bluetooth.
 
@@ -70,3 +67,8 @@ yarn install
 
 # Start
 yarn start:dev
+
+# Notes
+Ref:
+https://medium.com/@AnimoSolutions/how-to-install-libindy-for-linux-to-use-with-aries-framework-javascript-3470453dd233
+https://github.com/abandonware/bleno
