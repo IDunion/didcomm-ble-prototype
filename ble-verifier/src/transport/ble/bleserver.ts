@@ -13,12 +13,6 @@ export class bleServer {
     this.blecharacteristic = blecharacteristic
     this.bleservice = bleservice
     this.setup(this.blecharacteristic, this.bleservice, this.cBleWrite);
-    // console.log(this.blecharacteristic)
-    // console.log(this.bleservice)
-  }
-
-  toString(): string {
-    return '<Control>';
   }
 
   dispose(callback: () => void) {
@@ -29,8 +23,11 @@ export class bleServer {
     }
   }
 
-  private setup(blecharacteristic: string, bleservice: string, cBleWrite: any) {
+  public getDeviceID(){
+    return Bleno.address
+  }
 
+  private setup(blecharacteristic: string, bleservice: string, cBleWrite: any) {
     Bleno.on('accept', (clientAddress: string) => {
       console.log('bluetooth', `accept, client: ${clientAddress}`);
       Bleno.updateRssi();
@@ -38,14 +35,6 @@ export class bleServer {
 
     Bleno.on('disconnect', (clientAddress: string) => {
       console.log('bluetooth', `disconnect, client: ${clientAddress}`);
-    });
-
-    Bleno.on('rssiUpdate', (rssi: number) => {
-      console.log('bluetooth', `rssiUpdate: ${rssi}`);
-    });
-
-    Bleno.on('mtuChange', (mtu: number) => {
-      console.log('bluetooth', `mtuChange: ${mtu}`);
     });
 
     Bleno.on('advertisingStop', () => {
@@ -66,7 +55,7 @@ export class bleServer {
     });
 
     const characteristic = new didcommCharacteristic(blecharacteristic, cBleWrite);
-    
+
     Bleno.on('advertisingStart', (error?: Error | null) => {
       if (!error) {
         Bleno.setServices(
@@ -75,10 +64,6 @@ export class bleServer {
         );
       }
     });
-  }
-
-  private onWriteRequest(data: Buffer) {
-    console.log(data.toString('hex'));
   }
 }
 
