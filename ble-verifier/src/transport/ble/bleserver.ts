@@ -13,8 +13,6 @@ export class bleServer {
     this.blecharacteristic = blecharacteristic
     this.bleservice = bleservice
     this.setup(this.blecharacteristic, this.bleservice, this.cBleWrite);
-    // console.log(this.blecharacteristic)
-    // console.log(this.bleservice)
   }
 
   dispose(callback: () => void) {
@@ -25,8 +23,11 @@ export class bleServer {
     }
   }
 
-  private setup(blecharacteristic: string, bleservice: string, cBleWrite: any) {
+  public getDeviceID(){
+    return Bleno.address
+  }
 
+  private setup(blecharacteristic: string, bleservice: string, cBleWrite: any) {
     Bleno.on('accept', (clientAddress: string) => {
       console.log('bluetooth', `accept, client: ${clientAddress}`);
       Bleno.updateRssi();
