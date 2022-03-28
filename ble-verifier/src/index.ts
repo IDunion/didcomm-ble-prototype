@@ -71,6 +71,14 @@ const run = async () => {
     logger.debug('Mediator not set')
   }
 
+  // BLE Transport
+  if (!config.blecharacteristic || !config.bleservice) {
+    logger.error('Could not find BLE characteristics or service UUIDs, terminating')
+    return;
+  }
+  const BLEInbound = new BLEInboundTransport(config.blecharacteristic, config.bleservice)
+  const BLEOutbound = new BLEOutboundTransport(config.blecharacteristic, config.bleservice)
+
   const agentConfig: InitConfig = {
     label: 'ble-poc',
     walletConfig: {
@@ -91,6 +99,7 @@ const run = async () => {
     mediatorConnectionsInvite: mediatorConnectionsInvite,
     mediatorPickupStrategy: MediatorPickupStrategy.Implicit,
     mediatorPollingInterval: 5000,
+    endpoints: ["ble://12:34:56:78:9A:BC"],
   }
 
   const agent = new Agent(agentConfig, agentDependencies)
@@ -99,15 +108,8 @@ const run = async () => {
   agent.registerOutboundTransport(new HttpOutboundTransport())
   agent.registerOutboundTransport(new WsOutboundTransport())
 
-  // BLE Transport
-  if (!config.blecharacteristic || !config.bleservice) {
-    logger.error('Could not find BLE characteristics or service UUIDs, terminating')
-    return;
-  }
-  const BLEInbound = new BLEInboundTransport(config.blecharacteristic, config.bleservice)
+  // Register BLE Transports
   agent.registerInboundTransport(BLEInbound)
-
-  const BLEOutbound = new BLEOutboundTransport(config.blecharacteristic, config.bleservice)
   agent.registerOutboundTransport(BLEOutbound)
 
   await agent.initialize()

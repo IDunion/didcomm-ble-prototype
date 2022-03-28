@@ -3,7 +3,6 @@ import { AgentConfig } from '@aries-framework/core'
 import { Peripheral, startScanningAsync, on } from '@abandonware/noble'
 
 export class BLEOutboundTransport implements OutboundTransport {
-    private agent!: Agent
     private logger!: Logger
 
     private characteristic: string
@@ -44,6 +43,7 @@ export class BLEOutboundTransport implements OutboundTransport {
                 const {characteristics} = await peripheral.discoverSomeServicesAndCharacteristicsAsync([this.service], [this.characteristic]);
                 if(characteristics.length > 0) {
                     const data = Buffer.from(JSON.stringify(outboundPackage.payload))
+                    this.logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
                     await characteristics[0].writeAsync(data, true)
                 }
             }
