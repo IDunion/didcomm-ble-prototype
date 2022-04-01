@@ -78,6 +78,7 @@ const run = async () => {
   }
   const BLEInbound = new BLEInboundTransport(config.blecharacteristic, config.bleservice)
   const BLEOutbound = new BLEOutboundTransport(config.blecharacteristic, config.bleservice)
+  const BLEAddress = BLEInbound.getdeviceID()
 
   const agentConfig: InitConfig = {
     label: 'ble-poc',
@@ -99,7 +100,7 @@ const run = async () => {
     mediatorConnectionsInvite: mediatorConnectionsInvite,
     mediatorPickupStrategy: MediatorPickupStrategy.Implicit,
     mediatorPollingInterval: 5000,
-    endpoints: ["ble://12:34:56:78:9A:BC"],
+    endpoints: ["ble://" + BLEAddress],
   }
 
   const agent = new Agent(agentConfig, agentDependencies)
