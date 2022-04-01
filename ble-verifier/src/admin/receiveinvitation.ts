@@ -1,11 +1,10 @@
 import { AdminRoute } from "./route";
 import { TestLogger } from '../utils/logger'
 import type { Express, Request, Response } from 'express';
-import { Agent, ConnectionRecord, ConnectionInvitationMessage } from "@aries-framework/core";
-import { connect } from "http2";
+import { Agent, ConnectionInvitationMessage } from "@aries-framework/core";
 
 
-export class AdminAcceptInvitation implements AdminRoute {
+export class AdminReceiveInvitation implements AdminRoute {
     private agent: Agent
     private logger: TestLogger
 
@@ -44,16 +43,5 @@ export class AdminAcceptInvitation implements AdminRoute {
                 })
             })
         })
-        
-        express.get('/connections', (req: Request, res: Response) => {
-            this.logger.debug('Got connections list request')
-            const connectionRecords = this.agent.connections.getAll()
-            connectionRecords.then(connectionRecords => {
-                res.status(200).send(connectionRecords)
-            }).catch(record => {
-                res.status(400).send('Connections')
-            })
-        })
     }
-
 }
