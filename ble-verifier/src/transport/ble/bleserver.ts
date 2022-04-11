@@ -65,17 +65,15 @@ export class bleServer {
 }
 
 export function getDeviceID(): Promise<String> {
-  if (Bleno.address === "unkown") {
+  if (Bleno.address === 'unknown') {
     return new Promise(function (resolve, reject) {
-      Bleno.on('addressChange', (state: string) => {
-        if (state != "unkown") {
-          resolve(state)
-        } else {
-          reject("unkown")
-        }
+      // We are waiting here until the advertisement has started -> we make sure everything is started before getting the device address
+      Bleno.on('advertisingStart', (error?: Error | null) => {
+        resolve(Bleno.address)
       })
     })
   }
+  // In case we already have a valid address we can just return
   return new Promise(function (resolve) {
     resolve(Bleno.address)
   })

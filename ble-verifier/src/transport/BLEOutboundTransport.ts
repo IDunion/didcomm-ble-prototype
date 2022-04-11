@@ -1,6 +1,6 @@
 import type { Agent, OutboundTransport, OutboundPackage, Logger } from '@aries-framework/core'
 import { AgentConfig } from '@aries-framework/core'
-import { Peripheral, startScanningAsync, on } from '@abandonware/noble'
+import noble = require('@abandonware/noble')
 
 export class BLEOutboundTransport implements OutboundTransport {
     private logger!: Logger
@@ -31,10 +31,11 @@ export class BLEOutboundTransport implements OutboundTransport {
 
     public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {
         let deviceUUID = outboundPackage.endpoint
-        this.supportedSchemes.forEach(element => {
-            deviceUUID?.replace(element + '://', '')
+        this.supportedSchemes.forEach(prefix => {
+            deviceUUID?.replace(prefix + '://', '')
         })
-        on('discover', async(peripheral: Peripheral) => {
+        this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
+        noble.on('discover', async(peripheral: noble.Peripheral) => {
             this.logger.debug('Found BLE device ' + peripheral.uuid)
             if (peripheral.uuid == deviceUUID) {
                 // device UUID and service UUID match
@@ -49,7 +50,7 @@ export class BLEOutboundTransport implements OutboundTransport {
             }
         })
 
-        await startScanningAsync([this.service], true)
+        await noble.startScanningAsync([this.service], true)
     }
 
 }

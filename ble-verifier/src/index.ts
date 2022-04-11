@@ -79,6 +79,7 @@ const run = async () => {
   const BLEInbound = new BLEInboundTransport(config.blecharacteristic, config.bleservice)
   const BLEOutbound = new BLEOutboundTransport(config.blecharacteristic, config.bleservice)
   const BLEAddress = await BLEInbound.getdeviceID()
+  logger.debug("Got BLEAddress:", BLEAddress)
 
   const agentConfig: InitConfig = {
     label: 'ble-poc',
