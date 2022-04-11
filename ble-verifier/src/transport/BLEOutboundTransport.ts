@@ -18,7 +18,10 @@ export class BLEOutboundTransport implements OutboundTransport {
     public async start(agent: Agent): Promise<void> {
         const agentConfig = agent.injectionContainer.resolve(AgentConfig)
         this.logger = agentConfig.logger
-        this.logger.debug('Starting BLE outbound transport')
+        this.logger.debug(`Starting BLE outbound transport`, {
+            CharacteristicUUID: this.characteristic,
+            ServiceUUID: this.service,
+        })
     }
 
     public async stop(): Promise<void> {
@@ -32,12 +35,16 @@ export class BLEOutboundTransport implements OutboundTransport {
     public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {
         let deviceUUID = outboundPackage.endpoint
         this.supportedSchemes.forEach(prefix => {
-            deviceUUID?.replace(prefix + '://', '')
+            deviceUUID = deviceUUID?.replace(prefix + '://', '')
         })
+        // Convert tu noble format
+        deviceUUID = deviceUUID?.toLocaleLowerCase()
+        deviceUUID = deviceUUID?.replace(/:/g, '')
+
         this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
         noble.on('discover', async(peripheral: noble.Peripheral) => {
             this.logger.debug('Found BLE device ' + peripheral.uuid)
-            if (peripheral.uuid == deviceUUID) {
+            if (peripheral.uuid === deviceUUID) {
                 // device UUID and service UUID match
                 this.logger.debug('BLE device matches expected endpoint')
                 await peripheral.connectAsync();
@@ -50,7 +57,8 @@ export class BLEOutboundTransport implements OutboundTransport {
             }
         })
 
-        await noble.startScanningAsync([this.service], true)
+        //noble.startScanningAsync()
+        noble.startScanningAsync([this.service], true)
     }
 
 }
