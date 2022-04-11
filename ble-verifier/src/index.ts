@@ -78,7 +78,7 @@ const run = async () => {
   }
   const BLEInbound = new BLEInboundTransport(config.blecharacteristic, config.bleservice)
   const BLEOutbound = new BLEOutboundTransport(config.blecharacteristic, config.bleservice)
-  const BLEAddress = BLEInbound.getdeviceID()
+  const BLEAddress = await BLEInbound.getdeviceID()
 
   const agentConfig: InitConfig = {
     label: 'ble-poc',
@@ -103,7 +103,9 @@ const run = async () => {
     endpoints: ["ble://" + BLEAddress],
   }
 
-  const agent = new Agent(agentConfig, agentDependencies)
+    const agent = new Agent(agentConfig, agentDependencies)
+
+  // agent.config.clearDefaultMediator
 
   // Default Transports
   agent.registerOutboundTransport(new HttpOutboundTransport())
@@ -114,7 +116,7 @@ const run = async () => {
   agent.registerOutboundTransport(BLEOutbound)
 
   await agent.initialize()
-
+  
   // Admin webservice 
   const webserver = new AdminWebServer(logger, agent)
   await webserver.listen(8080) 

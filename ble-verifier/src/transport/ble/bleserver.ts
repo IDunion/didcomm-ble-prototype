@@ -23,10 +23,6 @@ export class bleServer {
     }
   }
 
-  public getDeviceID(){
-    return Bleno.address
-  }
-
   private setup(blecharacteristic: string, bleservice: string, cBleWrite: any) {
     Bleno.on('accept', (clientAddress: string) => {
       console.log('bluetooth', `accept, client: ${clientAddress}`);
@@ -47,6 +43,7 @@ export class bleServer {
     });
 
     Bleno.on('stateChange', (state: string) => {
+      console.log("statechange: " + state)
       if (state === 'poweredOn') {
         Bleno.startAdvertising('ble-didcomm', [this.bleservice], () => { });
       } else {
@@ -67,3 +64,19 @@ export class bleServer {
   }
 }
 
+export function getDeviceID(): Promise<String> {
+  if (Bleno.address === "unkown") {
+    return new Promise(function (resolve, reject) {
+      Bleno.on('addressChange', (state: string) => {
+        if (state != "unkown") {
+          resolve(state)
+        } else {
+          reject("unkown")
+        }
+      })
+    })
+  }
+  return new Promise(function (resolve) {
+    resolve(Bleno.address)
+  })
+}
