@@ -65,13 +65,13 @@ export class bleServer {
 }
 
 export function getDeviceID(): Promise<String> {
-  if (Bleno.address === "unkown") {
+  if (Bleno.address === "unknown") {
     return new Promise(function (resolve, reject) {
-      Bleno.on('addressChange', (state: string) => {
-        if (state != "unkown") {
-          resolve(state)
+      Bleno.on('stateChange', (state: string) => {
+        if (state != "unknown") {
+          resolve(Bleno.address)
         } else {
-          reject("unkown")
+          reject("unknown")
         }
       })
     })
