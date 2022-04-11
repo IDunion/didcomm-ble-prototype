@@ -97,9 +97,9 @@ const run = async () => {
     autoAcceptConnections: true,
     autoAcceptCredentials: AutoAcceptCredential.Always,
     useLegacyDidSovPrefix: true,
-    mediatorConnectionsInvite: mediatorConnectionsInvite,
-    mediatorPickupStrategy: MediatorPickupStrategy.Implicit,
-    mediatorPollingInterval: 5000,
+    // mediatorConnectionsInvite: mediatorConnectionsInvite,
+    // mediatorPickupStrategy: MediatorPickupStrategy.Implicit,
+    // mediatorPollingInterval: 5000,
     endpoints: ["ble://" + BLEAddress],
   }
 
