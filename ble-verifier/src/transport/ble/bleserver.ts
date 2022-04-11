@@ -70,6 +70,7 @@ export function getDeviceID(): Promise<String> {
       // We are waiting here until the advertisement has started -> we make sure everything is started before getting the device address
       Bleno.on('advertisingStart', (error?: Error | null) => {
         resolve(Bleno.address)
+
       })
     })
   }
