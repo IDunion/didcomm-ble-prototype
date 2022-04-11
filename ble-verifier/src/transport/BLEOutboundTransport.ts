@@ -11,8 +11,8 @@ export class BLEOutboundTransport implements OutboundTransport {
     public supportedSchemes: string[] = ['blue', 'ble']
 
     public constructor(characteristic: string, service: string) {
-        this.characteristic = characteristic
-        this.service = service
+        this.characteristic = this.parseUUID(characteristic)
+        this.service = this.parseUUID(service)
     }
 
     public async start(agent: Agent): Promise<void> {
@@ -32,14 +32,27 @@ export class BLEOutboundTransport implements OutboundTransport {
         this.logger.error('Error during ble scan: ', error)
     }
 
+    private parseUUID(input: string): string {
+        let output: string = input?.toLocaleLowerCase()
+        output = output.replace(/:/g, '')
+        output = output.replace(/-/g, '')
+        return output
+    }
+
     public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {
-        let deviceUUID = outboundPackage.endpoint
+        let deviceUUID: string;
+        if (outboundPackage.endpoint) {
+            deviceUUID = outboundPackage.endpoint
+        } else {
+            return new Promise(function(resolve, reject) {
+                reject()
+              });
+        }
         this.supportedSchemes.forEach(prefix => {
-            deviceUUID = deviceUUID?.replace(prefix + '://', '')
+            deviceUUID = deviceUUID.replace(prefix + '://', '')
         })
-        // Convert tu noble format
-        deviceUUID = deviceUUID?.toLocaleLowerCase()
-        deviceUUID = deviceUUID?.replace(/:/g, '')
+        // Convert to noble UUID format
+        deviceUUID = this.parseUUID(deviceUUID)
 
         this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
         noble.on('discover', async(peripheral: noble.Peripheral) => {
@@ -53,12 +66,13 @@ export class BLEOutboundTransport implements OutboundTransport {
                     const data = Buffer.from(JSON.stringify(outboundPackage.payload))
                     this.logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
                     await characteristics[0].writeAsync(data, true)
+                    await noble.stopScanningAsync()
                 }
             }
         })
 
-        //noble.startScanningAsync()
-        noble.startScanningAsync([this.service], true)
+        // noble.startScanningAsync()
+        return noble.startScanningAsync([this.service], true)
     }
 
 }
