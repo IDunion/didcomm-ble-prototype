@@ -21,6 +21,7 @@ npm install --global yarn
 ##  libindy
 ```bash=
 sudo apt install libzmq3-dev libsodium-dev libssl-dev
+sudo apt-get install -y build-essential pkg-config cmake libssl-dev libsqlite3-dev libzmq3-dev  libncursesw5-dev
 
 git clone https://github.com/hyperledger/indy-sdk.git
 

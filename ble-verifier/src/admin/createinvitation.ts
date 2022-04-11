@@ -22,6 +22,12 @@ export class AdminCreateInvitation implements AdminRoute {
                 autoAcceptConnection: true,
                 multiUseInvitation: true,
                 myLabel: "",
+                mediatorId: ""
+            }).then((connection: any) => {
+                res.status(200).send(connection)
+            }).catch(record => {
+                this.logger.error('Connection invitation invalid: ', record)
+                res.status(400).send('Invalid invitation')
             })
         })
     }
