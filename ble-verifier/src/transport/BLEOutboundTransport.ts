@@ -61,18 +61,22 @@ export class BLEOutboundTransport implements OutboundTransport {
                 // device UUID and service UUID match
                 this.logger.debug('BLE device matches expected endpoint')
                 await peripheral.connectAsync();
+                this.logger.debug('peripheral.connectAsync')
                 const {characteristics} = await peripheral.discoverSomeServicesAndCharacteristicsAsync([this.service], [this.characteristic]);
                 if(characteristics.length > 0) {
                     const data = Buffer.from(JSON.stringify(outboundPackage.payload))
                     this.logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
-                    await characteristics[0].writeAsync(data, true)
-                    await noble.stopScanningAsync()
+                    await characteristics[0].writeAsync(data, false)
+                } else {
+                    this.logger.debug('Error while searching char')
+                    
                 }
+                await noble.stopScanningAsync()
             }
         })
 
         // noble.startScanningAsync()
-        return noble.startScanningAsync([this.service], true)
+        return noble.startScanningAsync([this.service], false)
     }
 
 }

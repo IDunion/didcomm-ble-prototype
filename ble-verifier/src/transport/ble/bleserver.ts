@@ -56,7 +56,7 @@ export class bleServer {
     Bleno.on('advertisingStart', (error?: Error | null) => {
       if (!error) {
         Bleno.setServices(
-          [new Bleno.PrimaryService({ uuid: 'a422a59a-71fe-11eb-9439-0242ac130003', characteristics: [characteristic] })],
+          [new Bleno.PrimaryService({ uuid: 'a422a59a-71fe-11eb-9439-0242ac130002', characteristics: [characteristic] })],
           () => { }
         );
       }
