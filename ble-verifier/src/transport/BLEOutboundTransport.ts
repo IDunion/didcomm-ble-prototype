@@ -59,6 +59,7 @@ export class BLEOutboundTransport implements OutboundTransport {
             this.logger.debug('Found BLE device ' + peripheral.uuid)
             if (peripheral.uuid === deviceUUID) {
                 // device UUID and service UUID match
+                await noble.stopScanningAsync()
                 this.logger.debug('BLE device matches expected endpoint')
                 await peripheral.connectAsync();
                 this.logger.debug('peripheral.connectAsync')
@@ -71,7 +72,8 @@ export class BLEOutboundTransport implements OutboundTransport {
                     this.logger.debug('Error while searching char')
                     
                 }
-                await noble.stopScanningAsync()
+                this.logger.debug('disconnecting')
+                await peripheral.disconnectAsync()
             }
         })
 
