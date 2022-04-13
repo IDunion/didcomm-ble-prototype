@@ -53,33 +53,59 @@ export class BLEOutboundTransport implements OutboundTransport {
         })
         // Convert to noble UUID format
         deviceUUID = this.parseUUID(deviceUUID)
-
         this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
-        noble.on('discover', async(peripheral: noble.Peripheral) => {
-            this.logger.debug('Found BLE device ' + peripheral.uuid)
-            if (peripheral.uuid === deviceUUID) {
-                // device UUID and service UUID match
-                await noble.stopScanningAsync()
-                this.logger.debug('BLE device matches expected endpoint')
-                await peripheral.connectAsync();
-                this.logger.debug('peripheral.connectAsync')
-                const {characteristics} = await peripheral.discoverSomeServicesAndCharacteristicsAsync([this.service], [this.characteristic]);
-                if(characteristics.length > 0) {
-                    const data = Buffer.from(JSON.stringify(outboundPackage.payload))
-                    this.logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
-                    await characteristics[0].writeAsync(data, false)
-                } else {
-                    this.logger.debug('Error while searching char')
-                    
+        const logger = this.logger
+        const service = this.service
+        const characteristic = this.characteristic
+        const returnPromise = new Promise<void>(function (resolve, reject) {
+            noble.on('discover', async(peripheral: noble.Peripheral) => {
+                logger.debug('Found BLE device ' + peripheral.uuid)
+                if (peripheral.uuid === deviceUUID) {
+                    // device UUID and service UUID match
+                    logger.debug('BLE device matches expected endpoint')
+                    await peripheral.connectAsync().catch( (error): void => {
+                        logger.error('Could not connect to BLE device: ' + error)
+                        reject()
+                    })
+                    logger.debug('Connected to peripheral, discovering services/characteristics')
+                    await noble.stopScanningAsync().catch( (error): void => {
+                        logger.error('Could not stop scanning: ' + error)
+                        reject()
+                    })
+                    noble.removeAllListeners()
+                    await peripheral.discoverSomeServicesAndCharacteristicsAsync([service], [characteristic]).then((serviceAndChars) => {
+                        let characteristics = serviceAndChars.characteristics
+                        if(characteristics.length > 0) {
+                            const data = Buffer.from(JSON.stringify(outboundPackage.payload))
+                            logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
+                            characteristics[0].writeAsync(data, false).catch( (error): void => {
+                                logger.error("Error writing to characteristic: " + error)
+                                peripheral.disconnectAsync()
+                                reject()
+                            })
+                        } else {
+                            logger.debug('Error while searching char')
+                            peripheral.disconnectAsync()
+                            reject()
+                        }
+                    }).catch((error): void => {
+                        logger.error("BLE endpoint does not expose expected service/characteristic: " + error)
+                        peripheral.disconnectAsync()
+                        reject()
+                    })
+                    await peripheral.disconnectAsync().catch( (error): void => {
+                        logger.error('Could not disconnect from device: ' + error)
+                        reject()
+                    })
+                    resolve()
                 }
-                this.logger.debug('disconnecting')
-                await peripheral.disconnectAsync()
-            }
+            })
+            noble.startScanningAsync([service], false).catch( (error): void => {
+                logger.error('Could not start scanning: ' + error)
+                reject()
+            })
         })
-
-        // noble.startScanningAsync()
-        return noble.startScanningAsync([this.service], false)
+        return returnPromise
     }
-
 }
 
