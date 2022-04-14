@@ -63,16 +63,17 @@ export class BLEOutboundTransport implements OutboundTransport {
                 if (peripheral.uuid === deviceUUID) {
                     // device UUID and service UUID match
                     logger.debug('BLE device matches expected endpoint')
+                    noble.stopScanningAsync().catch( (error): void => {
+                        logger.error('Could not stop scanning: ' + error)
+                        reject()
+                    }).then( () =>{
+                        logger.error('Succefully stopScanningAsync')
+                    })
                     await peripheral.connectAsync().catch( (error): void => {
                         logger.error('Could not connect to BLE device: ' + error)
                         reject()
                     })
                     logger.debug('Connected to peripheral, discovering services/characteristics')
-                    await noble.stopScanningAsync().catch( (error): void => {
-                        logger.error('Could not stop scanning: ' + error)
-                        reject()
-                    })
-                    noble.removeAllListeners()
                     await peripheral.discoverSomeServicesAndCharacteristicsAsync([service], [characteristic]).then((serviceAndChars) => {
                         let characteristics = serviceAndChars.characteristics
                         if(characteristics.length > 0) {
@@ -82,7 +83,17 @@ export class BLEOutboundTransport implements OutboundTransport {
                                 logger.error("Error writing to characteristic: " + error)
                                 peripheral.disconnectAsync()
                                 reject()
+                            }).then( () =>{
+                                peripheral.disconnectAsync().catch( (error): void => {
+                                    logger.error('Could not disconnect from device: ' + error)
+                                    reject()
+                                })
+                                logger.debug('Resolving at end')
+                                noble.removeAllListeners()
+                                resolve()
+
                             })
+                            logger.debug('Writing Done')
                         } else {
                             logger.debug('Error while searching char')
                             peripheral.disconnectAsync()
@@ -93,11 +104,6 @@ export class BLEOutboundTransport implements OutboundTransport {
                         peripheral.disconnectAsync()
                         reject()
                     })
-                    await peripheral.disconnectAsync().catch( (error): void => {
-                        logger.error('Could not disconnect from device: ' + error)
-                        reject()
-                    })
-                    resolve()
                 }
             })
             noble.startScanningAsync([service], false).catch( (error): void => {
