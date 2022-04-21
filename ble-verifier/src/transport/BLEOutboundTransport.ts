@@ -7,7 +7,6 @@ export class BLEOutboundTransport implements OutboundTransport {
 
     private characteristic: string
     private service: string
-    private timeoutMs: number
     private timeoutDiscoveryMs: number
 
     public supportedSchemes: string[] = ['blue', 'ble']
@@ -15,8 +14,7 @@ export class BLEOutboundTransport implements OutboundTransport {
     public constructor(characteristic: string, service: string) {
         this.characteristic = this.parseUUID(characteristic)
         this.service = this.parseUUID(service)
-        this.timeoutMs = 500
-        this.timeoutDiscoveryMs = 5000
+        this.timeoutDiscoveryMs = 30000
     }
 
     public async start(agent: Agent): Promise<void> {
@@ -61,8 +59,18 @@ export class BLEOutboundTransport implements OutboundTransport {
         const logger = this.logger
         const service = this.service
         const characteristic = this.characteristic
-        const timeoutConnect = this.timeoutMs
         const timeoutDiscovery = this.timeoutDiscoveryMs
+
+        let timeoutId: NodeJS.Timeout
+        const discoveryTimeout = new Promise<void>((_, reject) => {
+            timeoutId = setTimeout(() => {
+                logger.error("BLE Outbound Timeout")
+                noble.cancelConnect(deviceUUID)
+                noble.removeAllListeners()
+                reject('BLE Outbound Timeout')
+            }, timeoutDiscovery, 'BLE Device discovery timeout');
+        });
+
         const discovery = new Promise<void>(function (resolve, reject) {
             noble.on('discover', async (peripheral: noble.Peripheral) => {
                 logger.debug('Found BLE device ' + peripheral.uuid)
@@ -73,58 +81,43 @@ export class BLEOutboundTransport implements OutboundTransport {
                         logger.error('Could not stop scanning: ' + error)
                         reject()
                     })
-                    // TODO: is there a better way to do this?
-                    let iterations = 1
-                    let finished = false
-                    while (iterations <= 3 && !finished) {
-                        iterations++
-                        const connectPromise = new Promise<void>((resolve, reject) => {
-                            logger.debug("Attempting to connect to BLE device - attempt " + iterations)
-                            peripheral.connectAsync().catch((error): void => {
-                                logger.error('Could not connect to BLE device: ' + error)
-                                reject()
-                            }).then(() => {
-                                peripheral.discoverSomeServicesAndCharacteristicsAsync([service], [characteristic]).then((serviceAndChars) => {
-                                    logger.debug('Got Services/Characteristics')
-                                    let characteristics = serviceAndChars.characteristics
-                                    if (characteristics.length > 0) {
-                                        const data = Buffer.from(JSON.stringify(outboundPackage.payload))
-                                        logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
-                                        characteristics[0].writeAsync(data, false).catch((error): void => {
-                                            logger.error("Error writing to characteristic: " + error)
-                                            peripheral.disconnectAsync()
-                                            reject()
-                                        }).then(() => {
-                                            peripheral.disconnectAsync()
-                                            noble.removeAllListeners()
-                                            resolve()
-
-                                        })
-                                    } else {
-                                        logger.debug('Error while searching for expected characteristic')
-                                        peripheral.disconnectAsync()
-                                        noble.removeAllListeners()
-                                        reject()
-                                    }
-                                }).catch((error): void => {
-                                    logger.error("BLE endpoint does not expose expected service/characteristic: " + error)
-                                    peripheral.disconnectAsync()
-                                    noble.removeAllListeners()
-                                    reject()
-                                })
-                            })
-                        })
-                        const timeoutPromise = new Promise((_, reject) => {
-                            setTimeout(reject, timeoutConnect);
-                        });
-                        await Promise.race([connectPromise, timeoutPromise]).then(() => {
-                            finished = true
-                            resolve()
-                        }).catch(() => {
-                            logger.error("Connecting to BLE device timeout")
-                            noble.cancelConnect(peripheral.uuid)
-                        });
+                    logger.debug('Connecting to BLE device')
+                    let cancel = () => {
+                        clearTimeout(timeoutId)
+                        peripheral.disconnectAsync()
+                        noble.removeAllListeners()
+                        noble.cancelConnect(deviceUUID)
                     }
+                    peripheral.connectAsync().catch((error): void => {
+                        logger.error('Could not connect to BLE device: ' + error)
+                        reject()
+                    }).then(() => {
+                        logger.debug('Getting Services/Characteristics')
+                        peripheral.discoverSomeServicesAndCharacteristicsAsync([service], [characteristic]).then((serviceAndChars) => {
+                            logger.debug('Successfuly found expected Services/Characteristics')
+                            let characteristics = serviceAndChars.characteristics
+                            if (characteristics.length > 0) {
+                                const data = Buffer.from(JSON.stringify(outboundPackage.payload))
+                                logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
+                                characteristics[0].writeAsync(data, false).catch((error): void => {
+                                    logger.error("Error writing to characteristic: " + error)
+                                    cancel()
+                                    reject()
+                                }).then(() => {
+                                    cancel()
+                                    resolve()
+                                })
+                            } else {
+                                logger.debug('Error while searching for expected characteristic')
+                                cancel()
+                                reject()
+                            }
+                        }).catch((error): void => {
+                            logger.error("BLE endpoint does not expose expected service/characteristic: " + error)
+                            cancel()
+                            reject()
+                        })
+                    })
                 }
             })
             noble.startScanningAsync([service], false).catch((error): void => {
@@ -132,9 +125,6 @@ export class BLEOutboundTransport implements OutboundTransport {
                 reject()
             })
         })
-        const discoveryTimeout = new Promise<void>((_, reject) => {
-            setTimeout(reject, timeoutDiscovery, 'BLE Device discovery timeout');
-        });
         return Promise.race([discovery, discoveryTimeout]);
     }
 }
