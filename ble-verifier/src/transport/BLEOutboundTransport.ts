@@ -14,7 +14,7 @@ export class BLEOutboundTransport implements OutboundTransport {
     public constructor(characteristic: string, service: string) {
         this.characteristic = this.parseUUID(characteristic)
         this.service = this.parseUUID(service)
-        this.timeoutDiscoveryMs = 30000
+        this.timeoutDiscoveryMs = 20000
     }
 
     public async start(agent: Agent): Promise<void> {
@@ -62,19 +62,31 @@ export class BLEOutboundTransport implements OutboundTransport {
         const timeoutDiscovery = this.timeoutDiscoveryMs
 
         let timeoutId: NodeJS.Timeout
+        let discoveredPeripheral: noble.Peripheral
+        let cancel = () => {
+            logger.debug('Disconnecting from device')
+            discoveredPeripheral.disconnectAsync()
+            noble.stopScanningAsync()
+            noble.removeAllListeners()
+            noble.cancelConnect(deviceUUID)
+        }
         const discoveryTimeout = new Promise<void>((_, reject) => {
             timeoutId = setTimeout(() => {
                 logger.error("BLE Outbound Timeout")
-                noble.cancelConnect(deviceUUID)
-                noble.removeAllListeners()
+                cancel()
                 reject('BLE Outbound Timeout')
             }, timeoutDiscovery, 'BLE Device discovery timeout');
         });
 
         const discovery = new Promise<void>(function (resolve, reject) {
             noble.on('discover', async (peripheral: noble.Peripheral) => {
+                discoveredPeripheral = peripheral
                 logger.debug('Found BLE device ' + peripheral.uuid)
-                if (peripheral.uuid === deviceUUID) {
+                if (discoveredPeripheral.uuid === deviceUUID) {
+                    let cancel = () => {
+                        clearTimeout(timeoutId)
+                        cancel()
+                    }
                     // device UUID and service UUID match
                     logger.debug('BLE device matches expected endpoint')
                     await noble.stopScanningAsync().catch((error): void => {
@@ -82,18 +94,13 @@ export class BLEOutboundTransport implements OutboundTransport {
                         reject()
                     })
                     logger.debug('Connecting to BLE device')
-                    let cancel = () => {
-                        clearTimeout(timeoutId)
-                        peripheral.disconnectAsync()
-                        noble.removeAllListeners()
-                        noble.cancelConnect(deviceUUID)
-                    }
-                    peripheral.connectAsync().catch((error): void => {
+                    discoveredPeripheral.connectAsync().catch((error): void => {
                         logger.error('Could not connect to BLE device: ' + error)
+                        cancel()
                         reject()
-                    }).then(() => {
-                        logger.debug('Getting Services/Characteristics')
-                        peripheral.discoverSomeServicesAndCharacteristicsAsync([service], [characteristic]).then((serviceAndChars) => {
+                    }).then(async() => {
+                        logger.debug('Getting Characteristics')
+                        discoveredPeripheral.discoverSomeServicesAndCharacteristicsAsync([service], [characteristic]).then((serviceAndChars) => {
                             logger.debug('Successfuly found expected Services/Characteristics')
                             let characteristics = serviceAndChars.characteristics
                             if (characteristics.length > 0) {
