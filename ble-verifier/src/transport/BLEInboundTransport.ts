@@ -1,6 +1,6 @@
 import type { Agent, InboundTransport, Logger } from '@aries-framework/core'
 import { AgentConfig } from '@aries-framework/core'
-import { bleServer } from './ble/bleserver'
+import { bleServer, getDeviceID } from './ble/bleserver'
 
 export class BLEInboundTransport implements InboundTransport {
     private agent!: Agent
@@ -8,26 +8,22 @@ export class BLEInboundTransport implements InboundTransport {
 
     private blecharacteristic: string
     private bleservice: string
-    private deviceID: string
 
     public constructor(blecharacteristic: string, bleservice: string) {
         this.blecharacteristic = blecharacteristic
         this.bleservice = bleservice
-        this.deviceID = ""
+        let boundcBleWrite = this.cBleWrite.bind(this)
+        const ble = new bleServer(this.blecharacteristic, this.bleservice, boundcBleWrite)
     }
 
     public async start(agent: Agent): Promise<void> {
         const agentConfig = agent.injectionContainer.resolve(AgentConfig)
         this.logger = agentConfig.logger
         this.agent = agent
-        agentConfig.logger.debug(`Starting HTTP inbound transport`, {
+        agentConfig.logger.debug(`Starting BLE inbound transport`, {
             ServiceUUID: this.bleservice,
             CharacteristicsUUID: this.blecharacteristic,
         })
-
-        let boundcBleWrite = this.cBleWrite.bind(this)
-        const ble = new bleServer(this.blecharacteristic, this.bleservice, boundcBleWrite)
-        this.deviceID = ble.getDeviceID()
     }
 
     // Callback for write request on bleCharacateristic
@@ -40,8 +36,8 @@ export class BLEInboundTransport implements InboundTransport {
         }
     }
 
-    public getdeviceID(){
-        return this.deviceID
+    public getdeviceID(): Promise<String>{
+        return getDeviceID()
     }
 
     public async stop(): Promise<void> {

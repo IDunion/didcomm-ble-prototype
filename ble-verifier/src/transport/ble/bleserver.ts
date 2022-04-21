@@ -23,10 +23,6 @@ export class bleServer {
     }
   }
 
-  public getDeviceID(){
-    return Bleno.address
-  }
-
   private setup(blecharacteristic: string, bleservice: string, cBleWrite: any) {
     Bleno.on('accept', (clientAddress: string) => {
       console.log('bluetooth', `accept, client: ${clientAddress}`);
@@ -47,6 +43,7 @@ export class bleServer {
     });
 
     Bleno.on('stateChange', (state: string) => {
+      console.log("statechange: " + state)
       if (state === 'poweredOn') {
         Bleno.startAdvertising('ble-didcomm', [this.bleservice], () => { });
       } else {
@@ -59,7 +56,7 @@ export class bleServer {
     Bleno.on('advertisingStart', (error?: Error | null) => {
       if (!error) {
         Bleno.setServices(
-          [new Bleno.PrimaryService({ uuid: 'a422a59a-71fe-11eb-9439-0242ac130003', characteristics: [characteristic] })],
+          [new Bleno.PrimaryService({ uuid: 'a422a59a-71fe-11eb-9439-0242ac130002', characteristics: [characteristic] })],
           () => { }
         );
       }
@@ -67,3 +64,18 @@ export class bleServer {
   }
 }
 
+export function getDeviceID(): Promise<String> {
+  if (Bleno.address === 'unknown') {
+    return new Promise(function (resolve, reject) {
+      // We are waiting here until the advertisement has started -> we make sure everything is started before getting the device address
+      Bleno.on('advertisingStart', (error?: Error | null) => {
+        resolve(Bleno.address)
+
+      })
+    })
+  }
+  // In case we already have a valid address we can just return
+  return new Promise(function (resolve) {
+    resolve(Bleno.address)
+  })
+}

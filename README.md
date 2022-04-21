@@ -74,6 +74,16 @@ yarn install
 # Start
 yarn start:dev
 
+# Running Flow
+Request Connection Invitation
+```bash=
+curl -X POST "http://xxx.xxx.xxx.xxx:8080/createconnection"
+```
+POST Request to other party
+```bash=
+curl -X POST -H "Content-Type: application/json" -d '{"@type":"https://didcomm.org/connections/1.0/invitation","@id":"xxxxx","label":"","recipientKeys":["xxxxxxxxx"],"serviceEndpoint":"ble://xx:xx:xx:xx:xx:xx","routingKeys":[]}' "http://xxx.xxx.xxx.xxx:8080/invitation"
+```
+
 # Notes
 Ref:
 https://medium.com/@AnimoSolutions/how-to-install-libindy-for-linux-to-use-with-aries-framework-javascript-3470453dd233
