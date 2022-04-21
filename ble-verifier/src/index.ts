@@ -43,7 +43,7 @@ const run = async () => {
     if (response.ok) {
       const content = await response.text()
       genesisTransactions = content
-      network = ''
+      network = config.network
       logger.debug('Setting genesis transactions from genesisurl')
     } else {
       logger.error('Could not read from genesis url')
