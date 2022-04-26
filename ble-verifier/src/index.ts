@@ -1,15 +1,17 @@
 import {
-    Agent,
-    AutoAcceptCredential,
-    HttpOutboundTransport, InitConfig, LogLevel, MediatorPickupStrategy, WsOutboundTransport
+  Agent,
+  AutoAcceptCredential,
+  HttpOutboundTransport, InboundTransport, InitConfig, LogLevel, MediatorPickupStrategy, OutboundTransport, WsOutboundTransport
 } from '@aries-framework/core'
 import { agentDependencies } from '@aries-framework/node'
 import * as fs from 'fs'
 import * as jsYaml from 'js-yaml'
 import fetch from 'node-fetch'
 import { AdminWebServer } from './admin/webserver'
-import { BLEInboundTransport } from './transport/BLEInboundTransport'
-import { BLEOutboundTransport } from './transport/BLEOutboundTransport'
+import { DIDCommCentral } from './transport/central/central'
+import { BLEPeripheralInboundTransport } from './transport/peripheral/BLEInboundTransport'
+import { BLEPeripheralOutboundTransport } from './transport/peripheral/BLEOutboundTransport'
+import { DIDCommPeripheral } from './transport/peripheral/peripheral'
 import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
 
@@ -76,9 +78,30 @@ const run = async () => {
     logger.error('Could not find BLE characteristics or service UUIDs, terminating')
     return;
   }
-  const BLEInbound = new BLEInboundTransport(config.blecharacteristic, config.bleservice)
-  const BLEOutbound = new BLEOutboundTransport(config.blecharacteristic, config.bleservice)
-  const BLEAddress = await BLEInbound.getdeviceID()
+
+  let inbound: InboundTransport[] = []
+  let outbound: OutboundTransport[] = []
+
+  let BLEAddress: String[] = []
+
+  if (config.blemode.indexOf('peripheral') > -1) {
+    logger.info('Starting BLE Peripheral mode')
+    const device = new DIDCommPeripheral(config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger)
+    BLEAddress.push(await device.getDeviceID().then((addr) => {
+      return 'ble://' + addr
+    }))
+    inbound.push(device.inboundTransport)
+    outbound.push(device.outboundTransport)
+  }
+  if (config.blemode.indexOf('central') > -1) {
+    logger.info('Starting BLE Central mode')
+    const device = new DIDCommCentral(config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger)
+    BLEAddress.push('ble-guest://')
+    inbound.push(device.inboundTransport)
+    outbound.push(device.outboundTransport)
+  }
+
+
   logger.debug("Got BLEAddress:", BLEAddress)
 
   const agentConfig: InitConfig = {
@@ -104,7 +127,7 @@ const run = async () => {
     endpoints: ["ble://" + BLEAddress],
   }
 
-    const agent = new Agent(agentConfig, agentDependencies)
+  const agent = new Agent(agentConfig, agentDependencies)
 
   // agent.config.clearDefaultMediator
 
@@ -113,15 +136,19 @@ const run = async () => {
   agent.registerOutboundTransport(new WsOutboundTransport())
 
   // Register BLE Transports
-  agent.registerInboundTransport(BLEInbound)
-  agent.registerOutboundTransport(BLEOutbound)
+  inbound.forEach((transport) => {
+    agent.registerInboundTransport(transport)
+  })
+  outbound.forEach((transport) => {
+    agent.registerOutboundTransport(transport)
+  })
 
   await agent.initialize()
-  
+
   // Admin webservice 
   const webserver = new AdminWebServer(logger, agent)
-  await webserver.listen(8080) 
-  
+  await webserver.listen(8080)
+
 }
 
 run()

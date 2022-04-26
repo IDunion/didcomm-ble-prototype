@@ -1,65 +1,39 @@
-import type { Agent, OutboundTransport, OutboundPackage, Logger } from '@aries-framework/core'
-import { AgentConfig } from '@aries-framework/core'
 import noble = require('@abandonware/noble')
+import type { Logger, OutboundPackage } from '@aries-framework/core'
+import { BLECentralInboundTransport } from './BLEInboundTransport'
+import { BLECentralOutboundTransport } from './BLEOutboundTransport'
 
-export class BLEOutboundTransport implements OutboundTransport {
+export class DIDCommCentral {
+    private readCharacteristicUUID: string
+    private writeCharacteristicUUID: string
+    private serviceUUID: string
+    
+    public inboundTransport: BLECentralInboundTransport
+    public outboundTransport: BLECentralOutboundTransport
     private logger!: Logger
+    private connected: noble.Peripheral[] = []
 
-    private characteristic: string
-    private service: string
-    private timeoutDiscoveryMs: number
 
-    public supportedSchemes: string[] = ['blue', 'ble']
+    constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger) {
+        this.readCharacteristicUUID = parseUUID(readCharacteristic)
+        this.writeCharacteristicUUID = parseUUID(writeCharacteristic)
+        this.serviceUUID = parseUUID(serviceUUID)
+        this.logger = logger
 
-    public constructor(characteristic: string, service: string) {
-        this.characteristic = this.parseUUID(characteristic)
-        this.service = this.parseUUID(service)
-        this.timeoutDiscoveryMs = 20000
+        this.inboundTransport = new BLECentralInboundTransport();
+        this.outboundTransport = new BLECentralOutboundTransport(this);
     }
 
-    public async start(agent: Agent): Promise<void> {
-        const agentConfig = agent.injectionContainer.resolve(AgentConfig)
-        this.logger = agentConfig.logger
-        this.logger.debug(`Starting BLE outbound transport`, {
-            CharacteristicUUID: this.characteristic,
-            ServiceUUID: this.service,
-        })
-    }
-
-    public async stop(): Promise<void> {
-
-    }
-
-    private errorCallback(error?: Error): void {
-        this.logger.error('Error during ble scan: ', error)
-    }
-
-    private parseUUID(input: string): string {
-        let output: string = input?.toLocaleLowerCase()
-        output = output.replace(/:/g, '')
-        output = output.replace(/-/g, '')
-        return output
-    }
-
-    public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {
-        let deviceUUID: string;
-        if (outboundPackage.endpoint) {
-            deviceUUID = outboundPackage.endpoint
-        } else {
-            return new Promise(function (resolve, reject) {
-                reject()
-            });
-        }
-        this.supportedSchemes.forEach(prefix => {
-            deviceUUID = deviceUUID.replace(prefix + '://', '')
-        })
+    
+    public send(UUID: string, outboundPackage: OutboundPackage) {
         // Convert to noble UUID format
-        deviceUUID = this.parseUUID(deviceUUID)
+        const deviceUUID = parseUUID(UUID)
         this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
         const logger = this.logger
-        const service = this.service
-        const characteristic = this.characteristic
-        const timeoutDiscovery = this.timeoutDiscoveryMs
+        const service = this.serviceUUID
+        const readChar = this.readCharacteristicUUID
+        const writeChar = this.writeCharacteristicUUID
+        const timeoutDiscovery = 10000
 
         let timeoutId: NodeJS.Timeout
         let discoveredPeripheral: noble.Peripheral
@@ -100,9 +74,10 @@ export class BLEOutboundTransport implements OutboundTransport {
                         reject()
                     }).then(async() => {
                         logger.debug('Getting Characteristics')
-                        discoveredPeripheral.discoverSomeServicesAndCharacteristicsAsync([service], [characteristic]).then((serviceAndChars) => {
+                        discoveredPeripheral.discoverSomeServicesAndCharacteristicsAsync([service], [readChar, writeChar]).then((serviceAndChars) => {
                             logger.debug('Successfuly found expected Services/Characteristics')
                             let characteristics = serviceAndChars.characteristics
+                            characteristics.find(element => element.uuid == readChar)
                             if (characteristics.length > 0) {
                                 const data = Buffer.from(JSON.stringify(outboundPackage.payload))
                                 logger.debug('Sending ' + JSON.stringify(outboundPackage.payload))
@@ -111,7 +86,6 @@ export class BLEOutboundTransport implements OutboundTransport {
                                     cancel()
                                     reject()
                                 }).then(() => {
-                                    cancel()
                                     resolve()
                                 })
                             } else {
@@ -136,3 +110,9 @@ export class BLEOutboundTransport implements OutboundTransport {
     }
 }
 
+function parseUUID(input: string): string {
+    let output: string = input?.toLocaleLowerCase()
+    output = output.replace(/:/g, '')
+    output = output.replace(/-/g, '')
+    return output
+}
