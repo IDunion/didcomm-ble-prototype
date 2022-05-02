@@ -4,6 +4,4 @@ mediatorinvite: 'http://mediator3.test.indiciotech.io:3000?c_i=eyJAdHlwZSI6ICJka
 blecharacteristicwrite: 'c3103ded-afd7-477c-b279-2ad264e20e74'
 blecharacteristiread: 'e6e97879-780a-4c9b-b4e6-dcae3793a3e8'
 bleservice: 'd2f195b6-2e80-4ab0-be24-32ebe761352f'
-blemode: 
-- peripheral
-- central
+blemode: 'both'

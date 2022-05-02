@@ -1,11 +1,9 @@
 import Bleno from '@abandonware/bleno'
-import type { Logger } from '@aries-framework/core'
-import { BLEPeripheralInboundTransport } from './BLEInboundTransport';
-import { BLEPeripheralOutboundTransport } from './BLEOutboundTransport';
+import type { Logger, OutboundPackage } from '@aries-framework/core'
 import { didcommReadCharacteristic } from './readCharacteristic'
 import { didcommWriteCharacteristic } from './writeCharacteristic'
 
-export class DIDCommPeripheral {
+export class TransportPeripheral {
   private isAdvertising: boolean;
 
   private readCharacteristicUUID: string
@@ -15,12 +13,10 @@ export class DIDCommPeripheral {
   private readChacateristic: didcommReadCharacteristic
   private writeCharacteristic: didcommWriteCharacteristic
 
-  public inboundTransport: BLEPeripheralInboundTransport
-  public outboundTransport: BLEPeripheralOutboundTransport
   private logger!: Logger
 
 
-  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger) {
+  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, outboundCB: any, inboundCB: any) {
     this.isAdvertising = false;
     this.readCharacteristicUUID = readCharacteristic
     this.writeCharacteristicUUID = writeCharacteristic
@@ -28,12 +24,16 @@ export class DIDCommPeripheral {
 
     this.logger = logger
 
-    this.inboundTransport = new BLEPeripheralInboundTransport();
-    this.outboundTransport = new BLEPeripheralOutboundTransport(this);
-    this.readChacateristic = new didcommReadCharacteristic(this.readCharacteristicUUID, this.outboundTransport.callback);
-    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, this.inboundTransport.callback);
+    this.readChacateristic = new didcommReadCharacteristic(this.readCharacteristicUUID, outboundCB);
+    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, inboundCB);
 
-    this.setup();
+    this.start();
+  }
+
+  public stop() {
+    Bleno.stopAdvertising()
+    Bleno.setServices([])
+    Bleno.removeAllListeners()
   }
 
   dispose(callback: () => void) {
@@ -44,7 +44,7 @@ export class DIDCommPeripheral {
     }
   }
 
-  private setup() {
+  public start() {
     Bleno.on('accept', (clientAddress: string) => {
       console.log('bluetooth', `accept, client: ${clientAddress}`);
       Bleno.updateRssi();
@@ -66,7 +66,7 @@ export class DIDCommPeripheral {
     Bleno.on('stateChange', (state: string) => {
       console.log("statechange: " + state)
       if (state === 'poweredOn') {
-        Bleno.startAdvertising('ble-didcomm', [this.serviceUUID], () => { 
+        Bleno.startAdvertising('ble-didcomm', [this.serviceUUID], () => {
           this.isAdvertising = true
         });
       } else {
@@ -83,13 +83,14 @@ export class DIDCommPeripheral {
       }
     });
   }
+
   public getDeviceID(): Promise<String> {
     if (Bleno.address === 'unknown') {
       return new Promise(function (resolve, reject) {
         // We are waiting here until the advertisement has started -> we make sure everything is started before getting the device address
         Bleno.on('advertisingStart', (error?: Error | null) => {
           resolve(Bleno.address)
-  
+
         })
       })
     }
@@ -97,5 +98,9 @@ export class DIDCommPeripheral {
     return new Promise(function (resolve) {
       resolve(Bleno.address)
     })
+  }
+
+  public sendMessage(uuid: string, payload: string): Promise<void> {
+    return this.readChacateristic.sendMessage(payload)
   }
 }

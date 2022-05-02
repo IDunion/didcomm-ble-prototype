@@ -8,10 +8,7 @@ import * as fs from 'fs'
 import * as jsYaml from 'js-yaml'
 import fetch from 'node-fetch'
 import { AdminWebServer } from './admin/webserver'
-import { DIDCommCentral } from './transport/central/central'
-import { BLEPeripheralInboundTransport } from './transport/peripheral/BLEInboundTransport'
-import { BLEPeripheralOutboundTransport } from './transport/peripheral/BLEOutboundTransport'
-import { DIDCommPeripheral } from './transport/peripheral/peripheral'
+import { BleTransport } from './transport/BLETransport'
 import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
 
@@ -82,25 +79,10 @@ const run = async () => {
   let inbound: InboundTransport[] = []
   let outbound: OutboundTransport[] = []
 
-  let BLEAddress: String[] = []
+  let BLEAddress: String
 
-  if (config.blemode.indexOf('peripheral') > -1) {
-    logger.info('Starting BLE Peripheral mode')
-    const device = new DIDCommPeripheral(config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger)
-    BLEAddress.push(await device.getDeviceID().then((addr) => {
-      return 'ble://' + addr
-    }))
-    inbound.push(device.inboundTransport)
-    outbound.push(device.outboundTransport)
-  }
-  if (config.blemode.indexOf('central') > -1) {
-    logger.info('Starting BLE Central mode')
-    const device = new DIDCommCentral(config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger)
-    BLEAddress.push('ble-guest://')
-    inbound.push(device.inboundTransport)
-    outbound.push(device.outboundTransport)
-  }
-
+  const BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristicwrite, config.blecharacteristiread, logger)
+  BLEAddress = await BLETransport.getDeviceID();
 
   logger.debug("Got BLEAddress:", BLEAddress)
 
