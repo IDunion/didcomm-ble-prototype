@@ -71,7 +71,7 @@ const run = async () => {
   }
 
   // BLE Transport
-  if (!config.blecharacteristic || !config.bleservice) {
+  if (!config.blecharacteristicwrite || !config.blecharacteristiread || !config.bleservice) {
     logger.error('Could not find BLE characteristics or service UUIDs, terminating')
     return;
   }

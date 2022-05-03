@@ -6,7 +6,7 @@ export class didcommReadCharacteristic extends Bleno.Characteristic {
   constructor(uuid: string) {
     super({
       uuid: uuid,
-      properties: ['read', 'notify'],
+      properties: ['read'],
       value: Buffer.from('')
     });
   }
