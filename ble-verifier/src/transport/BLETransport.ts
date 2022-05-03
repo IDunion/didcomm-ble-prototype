@@ -64,7 +64,7 @@ export class BleTransport {
 
   private startCentral() {
     if (!this.central) {
-      this.central = new TransportCentral(this.serviceUUID, this.readCharacteristic, this.writeCharacteristic, this.logger);
+      this.central = new TransportCentral(this.serviceUUID, this.readCharacteristic, this.writeCharacteristic, this.logger, this.receiveMessage.bind(this));
     }
   }
 
