@@ -77,7 +77,7 @@ export class BleTransport {
 
   private startPeripheral() {
     if (!this.peripheral) {
-      this.peripheral = new TransportPeripheral(this.serviceUUID, this.readCharacteristic, this.writeCharacteristic, this.logger, null, null);
+      this.peripheral = new TransportPeripheral(this.serviceUUID, this.readCharacteristic, this.writeCharacteristic, this.logger, this.receiveMessage.bind(this));
     }
   }
 
@@ -101,6 +101,10 @@ export class BleTransport {
         this.central?.sendMessage(uuid, payload)
         break;
     }
+  }
+
+  public receiveMessage(data?: Buffer): void {
+    this.Inbound.receiveMessage(data!)
   }
 
 }

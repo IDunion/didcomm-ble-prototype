@@ -18,6 +18,7 @@ export class didcommReadCharacteristic extends Bleno.Characteristic {
   private callback(offset: number) {
     if (this.resolveFunc) {
       this.resolveFunc()
+      this.resolveFunc = null
     }
   }
 

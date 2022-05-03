@@ -10,22 +10,24 @@ export class TransportCentral {
   private logger!: Logger
   private connected: noble.Peripheral[] = []
 
+  private inboundCB: (data?: Buffer) => void
 
-  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger) {
+
+  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void) {
     this.readCharacteristicUUID = parseUUID(readCharacteristic)
     this.writeCharacteristicUUID = parseUUID(writeCharacteristic)
     this.serviceUUID = parseUUID(serviceUUID)
     this.logger = logger
-
+    this.inboundCB = inboundCB
   }
 
-  public async stop() {
+  public async stop(): Promise<void> {
     await noble.stopScanningAsync();
     await noble.removeAllListeners();
     noble.reset()
   }
 
-  public sendMessage(uuid: string, payload: string) {
+  public sendMessage(uuid: string, payload: string): Promise<void> {
     // Convert to noble UUID format
     const deviceUUID = parseUUID(uuid)
     this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
@@ -107,6 +109,10 @@ export class TransportCentral {
       })
     })
     return Promise.race([discovery, discoveryTimeout]);
+  }
+
+  private receieveMessage(data?: Buffer): void {
+    this.inboundCB(data)
   }
 }
 

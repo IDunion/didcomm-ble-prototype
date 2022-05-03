@@ -16,7 +16,7 @@ export class TransportPeripheral {
   private logger!: Logger
 
 
-  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, outboundCB: any, inboundCB: any) {
+  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void) {
     this.isAdvertising = false;
     this.readCharacteristicUUID = readCharacteristic
     this.writeCharacteristicUUID = writeCharacteristic
@@ -24,7 +24,7 @@ export class TransportPeripheral {
 
     this.logger = logger
 
-    this.readChacateristic = new didcommReadCharacteristic(this.readCharacteristicUUID, outboundCB);
+    this.readChacateristic = new didcommReadCharacteristic(this.readCharacteristicUUID);
     this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, inboundCB);
 
     this.start();

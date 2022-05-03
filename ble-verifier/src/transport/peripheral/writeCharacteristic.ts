@@ -1,19 +1,19 @@
 import Bleno from '@abandonware/bleno'
 
 export class didcommWriteCharacteristic extends Bleno.Characteristic {
-  cBleWrite: any;
-
-  constructor(uuid: string, cBleWrite: any) {
+  private callback: any;
+  
+  constructor(uuid: string, callback: (data?: Buffer) => void) {
     super({
       uuid: uuid,
       properties: ['write'],
       value: null
     });
-    this.cBleWrite = cBleWrite;
+    this.callback = callback;
   }
 
-  onWriteRequest(data: any, offset: number, withoutResponse: boolean, callback: any) {
-    this.cBleWrite(data)
+  onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: any) {
+    this.callback(data)
     callback(Bleno.Characteristic.RESULT_SUCCESS);
   }
 }
