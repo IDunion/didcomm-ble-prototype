@@ -107,4 +107,11 @@ export class BleTransport {
     this.Inbound.receiveMessage(data!)
   }
 
+  public getInboundTransport(): BLEInboundTransport {
+    return this.Inbound
+  }
+  public getOutboundTransport(): BLEOutboundTransport {
+    return this.Outbound
+  }
+
 }

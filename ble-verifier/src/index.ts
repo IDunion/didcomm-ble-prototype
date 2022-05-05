@@ -83,6 +83,8 @@ const run = async () => {
 
   const BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristicwrite, config.blecharacteristiread, logger)
   BLEAddress = await BLETransport.getDeviceID();
+  inbound.push(BLETransport.getInboundTransport())
+  outbound.push(BLETransport.getOutboundTransport())
 
   logger.debug("Got BLEAddress:", BLEAddress)
 
