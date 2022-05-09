@@ -33,6 +33,7 @@ export class didcommReadCharacteristic extends Bleno.Characteristic {
     let timeoutId: NodeJS.Timeout
     const readTimeout = new Promise<void>((_, reject) => {
       timeoutId = setTimeout(() => {
+        this.resolveFunc = null
         reject('BLE Outbound Timeout')
       }, 10000, 'BLE Device discovery timeout');
     });

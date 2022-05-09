@@ -89,20 +89,36 @@ export class BleTransport {
   }
 
   public getDeviceID(): Promise<String> {
-    return this.peripheral!.getDeviceID()
-  }
-
-  public sendMessage(uuid: string, payload: string) {
     switch (this.mode) {
-      case BLEMode.Peripheral:
-        this.peripheral?.sendMessage(uuid, payload)
-        break;
       case BLEMode.Central:
-        this.central?.sendMessage(uuid, payload)
-        break;
+        return new Promise((resolve, reject) => {
+          // TODO: can we get a device UUID from central mode?
+          resolve('ble://central')
+        })
+      default:
+        return this.peripheral!.getDeviceID()
     }
   }
 
+  // Called by Aries Transport Implementation and forwards to correct BLE HW implementation
+  public sendMessage(uuid: string, payload: string): Promise<void> {
+    switch (this.mode) {
+      case BLEMode.Peripheral:
+        return this.peripheral!.sendMessage(uuid, payload)
+      case BLEMode.Central:
+        return this.central!.sendMessage(uuid, payload)
+      case BLEMode.Both:
+        // TODO: This needs some switching logic, looking up for active connections on peripheral
+        return this.central!.sendMessage(uuid, payload)
+      default:
+        this.logger.error('Unexpected BLE Mode while sending: ', this.mode)
+        return new Promise<void>((_, reject) => {
+          reject('Unexpected BLE Mode while sending')
+        })
+    }
+  }
+
+  // Used to forward message from BLE HW implementation to Aries Transport
   public receiveMessage(data?: Buffer): void {
     this.Inbound.receiveMessage(data!)
   }

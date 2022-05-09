@@ -76,15 +76,10 @@ const run = async () => {
     return;
   }
 
-  let inbound: InboundTransport[] = []
-  let outbound: OutboundTransport[] = []
-
   let BLEAddress: String
 
   const BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristicwrite, config.blecharacteristiread, logger)
   BLEAddress = await BLETransport.getDeviceID();
-  inbound.push(BLETransport.getInboundTransport())
-  outbound.push(BLETransport.getOutboundTransport())
 
   logger.debug("Got BLEAddress:", BLEAddress)
 
@@ -113,19 +108,13 @@ const run = async () => {
 
   const agent = new Agent(agentConfig, agentDependencies)
 
-  // agent.config.clearDefaultMediator
-
   // Default Transports
   agent.registerOutboundTransport(new HttpOutboundTransport())
   agent.registerOutboundTransport(new WsOutboundTransport())
 
   // Register BLE Transports
-  inbound.forEach((transport) => {
-    agent.registerInboundTransport(transport)
-  })
-  outbound.forEach((transport) => {
-    agent.registerOutboundTransport(transport)
-  })
+  agent.registerInboundTransport(BLETransport.getInboundTransport())
+  agent.registerOutboundTransport(BLETransport.getOutboundTransport())
 
   await agent.initialize()
 

@@ -1,7 +1,7 @@
 import Bleno from '@abandonware/bleno'
 
 export class didcommWriteCharacteristic extends Bleno.Characteristic {
-  private callback: any;
+  private callback!: (data?: Buffer) => void;
   
   constructor(uuid: string, callback: (data?: Buffer) => void) {
     super({

@@ -19,7 +19,6 @@ export class BLEOutboundTransport implements OutboundTransport {
   }
 
   public async stop(): Promise<void> {
-
   }
 
   public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {
@@ -35,6 +34,6 @@ export class BLEOutboundTransport implements OutboundTransport {
     this.supportedSchemes.forEach(prefix => {
       deviceUUID = deviceUUID.replace(prefix + '://', '')
     })
-    this.bleTransport.sendMessage(deviceUUID, JSON.stringify(outboundPackage.payload))
+    return this.bleTransport.sendMessage(deviceUUID, JSON.stringify(outboundPackage.payload))
   }
 }
