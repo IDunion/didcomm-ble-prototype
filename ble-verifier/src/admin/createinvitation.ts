@@ -1,7 +1,7 @@
 import { AdminRoute } from "./route";
 import { TestLogger } from '../utils/logger'
 import type { Express, Request, Response } from 'express';
-import { Agent } from "@aries-framework/core";
+import { Agent, OutOfBandRecord, ConnectionInvitationMessage } from "@aries-framework/core";
 
 
 export class AdminCreateInvitation implements AdminRoute {
@@ -18,13 +18,12 @@ export class AdminCreateInvitation implements AdminRoute {
 
     express.post('/createconnection', (req: Request, res: Response) => {
       this.logger.debug('Create connection')
-      this.agent.connections.createConnection({
+      this.agent.oob.createLegacyInvitation({
         autoAcceptConnection: true,
         multiUseInvitation: true,
-        myLabel: "",
-        mediatorId: ""
-      }).then((connection: any) => {
-        res.status(200).send(connection)
+        label: "",
+      }).then(value => {
+        res.status(200).send(value.outOfBandRecord.id)
       }).catch(record => {
         this.logger.error('Connection invitation invalid: ', record)
         res.status(400).send('Invalid invitation')

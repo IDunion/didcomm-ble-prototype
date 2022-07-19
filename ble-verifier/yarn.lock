@@ -36,15 +36,15 @@
   optionalDependencies:
     "@abandonware/bluetooth-hci-socket" "^0.5.3-8"
 
-"@aries-framework/core@0.2.0-alpha.55", "@aries-framework/core@0.2.0-alpha.55+c9bff93":
-  version "0.2.0-alpha.55"
-  resolved "https://registry.yarnpkg.com/@aries-framework/core/-/core-0.2.0-alpha.55.tgz#ee9b937e0c7389c9652728946a3c6a64f5a2d184"
-  integrity sha512-ojmU/2zvIJ1zbioeGdiaHANuekgE2L10NonMjOyNsxMlPlHPo15hWibcbbv+arT2uHoxQwYrJzub09DZ0Q8g+Q==
+"@aries-framework/core@0.2.2", "@aries-framework/core@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@aries-framework/core/-/core-0.2.2.tgz#43d798b4d0e9f212048cf2d79b99643db54f67a1"
+  integrity sha512-f9UXUa0Nl4tM8mE5O5BgQupKE6o53N/kba/F4oJc6mMpTXt1qk0HYtU52WjR5WHz3sqrXh2HgcsDerrQZmQulQ==
   dependencies:
     "@multiformats/base-x" "^4.0.1"
     "@stablelib/ed25519" "^1.0.2"
     "@stablelib/sha256" "^1.0.1"
-    "@types/indy-sdk" "^1.16.16"
+    "@types/indy-sdk" "^1.16.19"
     "@types/node-fetch" "^2.5.10"
     "@types/ws" "^7.4.6"
     abort-controller "^3.0.0"
@@ -66,15 +66,17 @@
     varint "^6.0.0"
     web-did-resolver "^2.0.8"
 
-"@aries-framework/node@0.2.0-alpha.55":
-  version "0.2.0-alpha.55"
-  resolved "https://registry.yarnpkg.com/@aries-framework/node/-/node-0.2.0-alpha.55.tgz#acb2bea0b5aae3112c65e56d354023bd378113ff"
-  integrity sha512-e2eKFlUSyxaIxdiWSPHgUnhCzh3jV856ZA+FHST/VDzuqXl1HiJ49udNSZ/1NgafsKcmqMxhb1p1TfZqDEEYfw==
+"@aries-framework/node@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@aries-framework/node/-/node-0.2.2.tgz#c52baa93d4fbb64f195a641d899a12c6e496ba6a"
+  integrity sha512-yKWiD0ECaH7aurK4K6M68s1cF1El6ssJD2fONBBzf+B4k64PVQ++mdrusyqfPBYeoboAFwfmaLZqkgaUuFh15A==
   dependencies:
-    "@aries-framework/core" "0.2.0-alpha.55+c9bff93"
+    "@aries-framework/core" "0.2.2"
     express "^4.17.1"
+    ffi-napi "^4.0.3"
     indy-sdk "^1.16.0-dev-1636"
     node-fetch "^2.6.1"
+    ref-napi "^3.0.3"
     ws "^7.5.3"
 
 "@cspotcode/source-map-consumer@0.8.0":
@@ -321,10 +323,10 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
-"@types/indy-sdk@^1.16.16":
-  version "1.16.16"
-  resolved "https://registry.yarnpkg.com/@types/indy-sdk/-/indy-sdk-1.16.16.tgz#dc9e51c61c266eff616991fa7df88309975d9f1e"
-  integrity sha512-bSWG56bAFvjTTLHJoGEXylbbN533g9XEtOTPS9G1EvIv5AsVcy/OIZOkXXElbzvYdZ1Q+qCxZDD5T0OqMYNmjg==
+"@types/indy-sdk@^1.16.19":
+  version "1.16.21"
+  resolved "https://registry.yarnpkg.com/@types/indy-sdk/-/indy-sdk-1.16.21.tgz#bb6178e2a515115b1bf225fb78506a3017d08aa8"
+  integrity sha512-SIu1iOa77lkxkGlW09OinFwebe7U5oDYwI70NnPoe9nbDr63i0FozITWEyIdC1BloKvZRXne6nM4i9zy6E3n6g==
   dependencies:
     buffer "^6.0.0"
 
@@ -1534,6 +1536,18 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
+ffi-napi@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/ffi-napi/-/ffi-napi-4.0.3.tgz#27a8d42a8ea938457154895c59761fbf1a10f441"
+  integrity sha512-PMdLCIvDY9mS32RxZ0XGb95sonPRal8aqRhLbeEtWKZTe2A87qRFG9HjOhvG8EX2UmQw5XNRMIOT+1MYlWmdeg==
+  dependencies:
+    debug "^4.1.1"
+    get-uv-event-loop-napi-h "^1.0.5"
+    node-addon-api "^3.0.0"
+    node-gyp-build "^4.2.1"
+    ref-napi "^2.0.1 || ^3.0.2"
+    ref-struct-di "^1.1.0"
+
 file-entry-cache@^6.0.1:
   version "6.0.1"
   resolved "https://registry.npmjs.org/file-entry-cache/-/file-entry-cache-6.0.1.tgz"
@@ -1710,6 +1724,18 @@ get-stream@^5.1.0:
   integrity sha512-nBF+F1rAZVCu/p7rjzgA+Yb4lfYXrpl7a6VmJrU8wF9I1CKvP/QwPNZHnOlwbTkY6dvtFIzFMSyQXbLoTQPRpA==
   dependencies:
     pump "^3.0.0"
+
+get-symbol-from-current-process-h@^1.0.1, get-symbol-from-current-process-h@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/get-symbol-from-current-process-h/-/get-symbol-from-current-process-h-1.0.2.tgz#510af52eaef873f7028854c3377f47f7bb200265"
+  integrity sha512-syloC6fsCt62ELLrr1VKBM1ggOpMdetX9hTrdW77UQdcApPHLmf7CI7OKcN1c9kYuNxKcDe4iJ4FY9sX3aw2xw==
+
+get-uv-event-loop-napi-h@^1.0.5:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/get-uv-event-loop-napi-h/-/get-uv-event-loop-napi-h-1.0.6.tgz#42b0b06b74c3ed21fbac8e7c72845fdb7a200208"
+  integrity sha512-t5c9VNR84nRoF+eLiz6wFrEp1SE2Acg0wS+Ysa2zF0eROes+LzOfuTaVHxGy8AbS8rq7FHEJzjnCZo1BupwdJg==
+  dependencies:
+    get-symbol-from-current-process-h "^1.0.1"
 
 getpass@^0.1.1:
   version "0.1.7"
@@ -2582,7 +2608,7 @@ negotiator@0.6.3, negotiator@^0.6.2:
   resolved "https://registry.npmjs.org/negotiator/-/negotiator-0.6.3.tgz"
   integrity sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==
 
-node-addon-api@^3.1.0, node-addon-api@^3.2.0:
+node-addon-api@^3.0.0, node-addon-api@^3.1.0, node-addon-api@^3.2.0:
   version "3.2.1"
   resolved "https://registry.npmjs.org/node-addon-api/-/node-addon-api-3.2.1.tgz"
   integrity sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==
@@ -2598,6 +2624,11 @@ node-fetch@2.6.7, node-fetch@^2.6.1, node-fetch@^2.6.5:
   integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
   dependencies:
     whatwg-url "^5.0.0"
+
+node-gyp-build@^4.2.1:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.5.0.tgz#7a64eefa0b21112f89f58379da128ac177f20e40"
+  integrity sha512-2iGbaQBV+ITgCz76ZEjmhUKAKVf7xfY1sRl4UiKQspfZMH2h06SyhNsnSVy50cwkFQDGLyif6m/6uFXHkOZ6rg==
 
 node-gyp-build@^4.3.0:
   version "4.3.0"
@@ -3034,6 +3065,23 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+"ref-napi@^2.0.1 || ^3.0.2", ref-napi@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/ref-napi/-/ref-napi-3.0.3.tgz#e259bfc2bbafb3e169e8cd9ba49037dd00396b22"
+  integrity sha512-LiMq/XDGcgodTYOMppikEtJelWsKQERbLQsYm0IOOnzhwE9xYZC7x8txNnFC9wJNOkPferQI4vD4ZkC0mDyrOA==
+  dependencies:
+    debug "^4.1.1"
+    get-symbol-from-current-process-h "^1.0.2"
+    node-addon-api "^3.0.0"
+    node-gyp-build "^4.2.1"
+
+ref-struct-di@^1.1.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/ref-struct-di/-/ref-struct-di-1.1.1.tgz#5827b1d3b32372058f177547093db1fe1602dc10"
+  integrity sha512-2Xyn/0Qgz89VT+++WP0sTosdm9oeowLP23wRJYhG4BFdMUrLj3jhwHZNEytYNYgtPKLNTP3KJX4HEgBvM1/Y2g==
+  dependencies:
+    debug "^3.1.0"
 
 reflect-metadata@^0.1.13:
   version "0.1.13"
