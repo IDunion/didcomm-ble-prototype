@@ -1,13 +1,13 @@
 import {
-  Agent,
-  AutoAcceptCredential,
-  HttpOutboundTransport, InboundTransport, InitConfig, LogLevel, MediatorPickupStrategy, OutboundTransport, WsOutboundTransport
+  Agent, AutoAcceptCredential, HttpOutboundTransport,
+  InitConfig, LogLevel, WsOutboundTransport
 } from '@aries-framework/core'
 import { agentDependencies } from '@aries-framework/node'
 import * as fs from 'fs'
 import * as jsYaml from 'js-yaml'
 import fetch from 'node-fetch'
 import { AdminWebServer } from './admin/webserver'
+import { Config } from './utils/config'
 import { BleTransport } from './transport/BLETransport'
 import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
@@ -31,18 +31,22 @@ const run = async () => {
 
   // Read Config File
   const file = fs.readFileSync(configPath, 'utf8');
-  const config: any = jsYaml.load(file);
+  const config: Config = jsYaml.load(file) as Config;
+  logger.debug('Configuratrion: ' + config)
 
   // Set genesis transaction from either genesis url, network name or default to idunion
   let network = "idunion"
   let genesisTransactions = utils.gensis.get(network)
 
   if (config.genesisurl) {
+    logger.debug('Getting genesis file from url: ' + config.genesisurl)
     const response = await fetch(config.genesisurl)
     if (response.ok) {
       const content = await response.text()
       genesisTransactions = content
-      network = config.network
+      if (config.network) {
+        network = config.network
+      }
       logger.debug('Setting genesis transactions from genesisurl')
     } else {
       logger.error('Could not read from genesis url')
@@ -71,17 +75,19 @@ const run = async () => {
   }
 
   // BLE Transport
-  if (!config.blecharacteristicwrite || !config.blecharacteristiread || !config.bleservice) {
-    logger.error('Could not find BLE characteristics or service UUIDs, terminating')
-    return;
+  let BLEAddress: String = ""
+  let BLETransport: BleTransport | undefined = undefined
+  if (config.blemode && config.blemode != 'off') {
+    if (!config.blecharacteristicwrite || !config.blecharacteristiread || !config.bleservice) {
+      logger.error('Could not find BLE characteristics or service UUIDs, terminating')
+      return;
+    }
+
+    BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristicwrite, config.blecharacteristiread, logger)
+    BLEAddress = await BLETransport.getDeviceID();
+
+    logger.debug("Got BLEAddress:", BLEAddress)
   }
-
-  let BLEAddress: String
-
-  const BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristicwrite, config.blecharacteristiread, logger)
-  BLEAddress = await BLETransport.getDeviceID();
-
-  logger.debug("Got BLEAddress:", BLEAddress)
 
   const agentConfig: InitConfig = {
     label: 'ble-poc',
@@ -113,8 +119,10 @@ const run = async () => {
   agent.registerOutboundTransport(new WsOutboundTransport())
 
   // Register BLE Transports
-  agent.registerInboundTransport(BLETransport.getInboundTransport())
-  agent.registerOutboundTransport(BLETransport.getOutboundTransport())
+  if (config.blemode != 'off' && BLETransport) {
+    agent.registerInboundTransport(BLETransport.getInboundTransport())
+    agent.registerOutboundTransport(BLETransport.getOutboundTransport())
+  }
 
   await agent.initialize()
 

@@ -1,4 +1,4 @@
-import { Logger, OutboundPackage } from "@aries-framework/core";
+import { Logger } from "@aries-framework/core";
 import { BLEInboundTransport } from "./BLEInboundTransport";
 import { BLEOutboundTransport } from "./BLEOutboundTransport";
 import { TransportCentral } from "./central/central";
@@ -88,15 +88,15 @@ export class BleTransport {
     }
   }
 
-  public getDeviceID(): Promise<String> {
+  public getDeviceID(): Promise<string> {
     switch (this.mode) {
       case BLEMode.Central:
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, ) => {
           // TODO: can we get a device UUID from central mode?
-          resolve('ble://central')
+          resolve('central')
         })
       default:
-        return this.peripheral!.getDeviceID()
+        return this.peripheral?.getDeviceID() ?? new Promise((_, reject) => { reject('no peripheral device configured') });
     }
   }
 
@@ -104,12 +104,12 @@ export class BleTransport {
   public sendMessage(uuid: string, payload: string): Promise<void> {
     switch (this.mode) {
       case BLEMode.Peripheral:
-        return this.peripheral!.sendMessage(uuid, payload)
+        return this.peripheral?.sendMessage(uuid, payload) ?? new Promise((_, reject) => { reject('no peripheral device configured') })
       case BLEMode.Central:
-        return this.central!.sendMessage(uuid, payload)
+        return this.central?.sendMessage(uuid, payload) ?? new Promise((_, reject) => { reject('no central device configured') })
       case BLEMode.Both:
         // TODO: This needs some switching logic, looking up for active connections on peripheral
-        return this.central!.sendMessage(uuid, payload)
+        return this.central?.sendMessage(uuid, payload) ?? new Promise((_, reject) => { reject('no central device configured') })
       default:
         this.logger.error('Unexpected BLE Mode while sending: ', this.mode)
         return new Promise<void>((_, reject) => {
@@ -120,7 +120,9 @@ export class BleTransport {
 
   // Used to forward message from BLE HW implementation to Aries Transport
   public receiveMessage(data?: Buffer): void {
-    this.Inbound.receiveMessage(data!)
+    if(data) {
+      this.Inbound.receiveMessage(data)
+    }
   }
 
   public getInboundTransport(): BLEInboundTransport {

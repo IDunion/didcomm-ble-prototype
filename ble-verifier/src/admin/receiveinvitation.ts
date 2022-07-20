@@ -1,7 +1,7 @@
 import { AdminRoute } from "./route";
 import { TestLogger } from '../utils/logger'
 import type { Express, Request, Response } from 'express';
-import { Agent, ConnectionInvitationMessage, HandshakeProtocol, RecordDuplicateError } from "@aries-framework/core";
+import { Agent, HandshakeProtocol } from "@aries-framework/core";
 
 
 export class AdminReceiveInvitation implements AdminRoute {
@@ -19,12 +19,12 @@ export class AdminReceiveInvitation implements AdminRoute {
     express.post('/invitation', (req: Request, res: Response) => {
       this.logger.debug('Got connection invitation')
       const invitation = req.body
-      const connectionRecord = this.agent.connections.acceptOutOfBandInvitation(invitation, {
+      const connectionRecord = this.agent.oob.receiveInvitation(invitation, {
         autoAcceptConnection: true,
-        protocol: HandshakeProtocol.Connections,
+        reuseConnection: false,
       })
       connectionRecord.then(record => {
-        this.logger.debug('Connection invitation accepted')
+        this.logger.debug('Connection invitation accepted: ' + record.outOfBandRecord.id)
         res.status(200).send('Invitation accepted')
       }).catch(record => {
         this.logger.error('Connection invitation invalid: ', record)
@@ -37,10 +37,10 @@ export class AdminReceiveInvitation implements AdminRoute {
       const invitation = this.agent.oob.receiveInvitationFromUrl(req.url, {
         autoAcceptConnection: true,
         autoAcceptInvitation: true,
-        reuseConnection: true,
+        reuseConnection: false,
       })
       invitation.then(record => {
-        this.logger.debug('Connection invitation accepted. ')
+        this.logger.debug('Connection invitation accepted: ' + record.connectionRecord?.id ?? '')
         res.status(200).send('Invitation accepted')
       }).catch(record => {
         this.logger.error('Connection invitation invalid: ', record)

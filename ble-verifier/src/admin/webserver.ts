@@ -1,6 +1,6 @@
 import { Agent } from '@aries-framework/core'
 import express from 'express'
-import bodyParser, { BodyParser } from 'body-parser'
+import bodyParser from 'body-parser'
 import { TestLogger } from '../utils/logger'
 import type { AdminRoute } from './route'
 import { AdminReceiveInvitation } from './receiveinvitation'

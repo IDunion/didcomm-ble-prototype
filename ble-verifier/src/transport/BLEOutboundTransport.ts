@@ -19,6 +19,7 @@ export class BLEOutboundTransport implements OutboundTransport {
   }
 
   public async stop(): Promise<void> {
+    return new Promise((resolve, ) => { resolve() })
   }
 
   public async sendMessage(outboundPackage: OutboundPackage): Promise<void> {

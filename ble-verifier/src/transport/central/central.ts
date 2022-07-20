@@ -1,6 +1,5 @@
+import type { Logger } from '@aries-framework/core'
 import noble = require('@abandonware/noble')
-import type { Logger, OutboundPackage } from '@aries-framework/core'
-
 
 export class TransportCentral {
   private readCharacteristicUUID: string
@@ -19,6 +18,7 @@ export class TransportCentral {
     this.serviceUUID = parseUUID(serviceUUID)
     this.logger = logger
     this.inboundCB = inboundCB
+
   }
 
   public async stop(): Promise<void> {
@@ -41,7 +41,9 @@ export class TransportCentral {
     let discoveredPeripheral: noble.Peripheral
     let cancel = () => {
       logger.debug('Disconnecting from device')
-      discoveredPeripheral.disconnectAsync()
+      if (discoveredPeripheral) {
+        discoveredPeripheral.disconnectAsync()
+      }
       noble.stopScanningAsync()
       noble.removeAllListeners()
       noble.cancelConnect(deviceUUID)
@@ -53,7 +55,7 @@ export class TransportCentral {
         reject('BLE Outbound Timeout')
       }, timeoutDiscovery, 'BLE Device discovery timeout');
     });
-
+    const _this = this;
     const discovery = new Promise<void>(function (resolve, reject) {
       noble.on('discover', async (peripheral: noble.Peripheral) => {
         discoveredPeripheral = peripheral
@@ -88,6 +90,7 @@ export class TransportCentral {
                   cancel()
                   reject()
                 }).then(() => {
+                  _this.connected.push(discoveredPeripheral)
                   resolve()
                 })
               } else {

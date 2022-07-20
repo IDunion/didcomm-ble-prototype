@@ -84,7 +84,7 @@ export class TransportPeripheral {
     });
   }
 
-  public getDeviceID(): Promise<String> {
+  public getDeviceID(): Promise<string> {
     if (Bleno.address === 'unknown') {
       return new Promise(function (resolve, reject) {
         // We are waiting here until the advertisement has started -> we make sure everything is started before getting the device address

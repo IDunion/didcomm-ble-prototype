@@ -5,9 +5,6 @@ export class BLEInboundTransport implements InboundTransport {
   private agent!: Agent
   private logger!: Logger
 
-  public constructor() {
-  }
-
   public async start(agent: Agent): Promise<void> {
     const agentConfig = agent.injectionContainer.resolve(AgentConfig)
     this.logger = agentConfig.logger
@@ -16,6 +13,7 @@ export class BLEInboundTransport implements InboundTransport {
   }
 
   public async stop(): Promise<void> {
+    return new Promise((resolve, ) => { resolve() })
   }
 
   // Callback for write request on bleCharacateristic

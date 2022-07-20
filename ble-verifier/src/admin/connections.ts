@@ -21,7 +21,7 @@ export class AdminConnections implements AdminRoute {
       connectionRecords.then(connectionRecords => {
         res.status(200).send(connectionRecords)
       }).catch(record => {
-        res.status(400).send('Connections')
+        res.status(400).send('Error getting connections: ' + record)
       })
     })
   }

@@ -1,7 +1,7 @@
 import { AdminRoute } from "./route";
 import { TestLogger } from '../utils/logger'
 import type { Express, Request, Response } from 'express';
-import { Agent, OutOfBandRecord, ConnectionInvitationMessage } from "@aries-framework/core";
+import { Agent } from "@aries-framework/core";
 
 
 export class AdminCreateInvitation implements AdminRoute {
@@ -23,7 +23,7 @@ export class AdminCreateInvitation implements AdminRoute {
         multiUseInvitation: true,
         label: "",
       }).then(value => {
-        res.status(200).send(value.outOfBandRecord.id)
+        res.status(200).send(value.invitation.toJSON())
       }).catch(record => {
         this.logger.error('Connection invitation invalid: ', record)
         res.status(400).send('Invalid invitation')
