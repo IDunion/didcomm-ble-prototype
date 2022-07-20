@@ -1,3 +1,4 @@
+import Bleno from '@abandonware/bleno'
 import { Characteristic } from '@abandonware/bleno'
 import type { Logger } from '@aries-framework/core'
 
@@ -11,6 +12,7 @@ export class didcommReadCharacteristic extends Characteristic {
       uuid: uuid,
       properties: ['notify', 'read'],
       value: null,
+
     });
     this.logger = logger;
     this._updateCB = null
@@ -21,9 +23,10 @@ export class didcommReadCharacteristic extends Characteristic {
     if(this._updateCB) {
       this._updateCB(this.value)
     }
+    this.logger.debug('Set value: ' + this.value.toString())
   }
 
-  private callback(offset: number) {
+  private callback() {
     if (this.resolveFunc) {
       this.resolveFunc()
       this.resolveFunc = null
@@ -31,12 +34,15 @@ export class didcommReadCharacteristic extends Characteristic {
   }
 
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
-    this.callback(offset)
-    callback(Characteristic.RESULT_SUCCESS, this.value!);
+    this.logger.debug('Getting Read Request - offset: ' + offset)
+    if(offset + Bleno.mtu >= this.value!.byteLength) {
+      this.callback()
+    }
+    callback(Characteristic.RESULT_SUCCESS, this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength)));
   }
 
   public sendMessage(payload: string): Promise<void> {
-    // TODO: Figure out how to wait for a read event
+    this.logger.debug('Setting Message for readCharacteristic: ' + payload)
     this.setMessage(payload)
     let timeoutId: NodeJS.Timeout
     const readTimeout = new Promise<void>((_, reject) => {
@@ -60,5 +66,6 @@ export class didcommReadCharacteristic extends Characteristic {
   onUnsubscribe() {
     this.logger.debug('ReadCharacteristic - onUnsubscribe');
     this._updateCB = null;
+    this.value = null;
   };
 }

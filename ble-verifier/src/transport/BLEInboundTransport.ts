@@ -22,7 +22,7 @@ export class BLEInboundTransport implements InboundTransport {
       const encryptedMessage = JSON.parse(data.toString('utf8'))
       await this.agent.receiveMessage(encryptedMessage)
     } catch (error) {
-      this.logger.debug('Error processing inbound message:' + error)
+      this.logger.debug('Error processing inbound message: ' + error)
       this.logger.debug(data.toString('utf8'))
     }
   }

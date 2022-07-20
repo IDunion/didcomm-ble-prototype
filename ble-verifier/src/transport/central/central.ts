@@ -13,7 +13,6 @@ export class TransportCentral {
   private serviceUUID: string
 
   private logger!: Logger
-  private connected?: ConncetedDevice
 
   private inboundCB: (data?: Buffer) => void
 
@@ -24,7 +23,6 @@ export class TransportCentral {
     this.serviceUUID = parseUUID(serviceUUID)
     this.logger = logger
     this.inboundCB = inboundCB
-
   }
 
   public async stop(): Promise<void> {
@@ -42,6 +40,7 @@ export class TransportCentral {
     const readChar = this.readCharacteristicUUID
     const writeChar = this.writeCharacteristicUUID
     const timeoutDiscovery = 10000
+    const timeoutResponse = 10000
 
     let timeoutId: NodeJS.Timeout
     let discoveredPeripheral: noble.Peripheral
@@ -67,7 +66,7 @@ export class TransportCentral {
         discoveredPeripheral = peripheral
         logger.debug('Found BLE device ' + peripheral.uuid)
         if (discoveredPeripheral.uuid === deviceUUID) {
-          let cancel = () => {
+          let _cancel = () => {
             clearTimeout(timeoutId)
             cancel()
           }
@@ -80,7 +79,7 @@ export class TransportCentral {
           logger.debug('Connecting to BLE device')
           discoveredPeripheral.connectAsync().catch((error): void => {
             logger.error('Could not connect to BLE device: ' + error)
-            cancel()
+            _cancel()
             reject()
           }).then(async () => {
             logger.debug('Getting Characteristics')
@@ -94,35 +93,42 @@ export class TransportCentral {
                 logger.debug('Sending ' + payload)
                 writeCharacteristic.writeAsync(data, true).catch((error): void => {
                   logger.error("Error writing to characteristic: " + error)
-                  cancel()
+                  _cancel()
                   reject()
                 }).then(() => {
-                  logger.debug('Successfully sent message')
-                  readCharacteristic?.on('read', (data: Buffer, isNotification: boolean) => {
-                    _this.inboundCB(data)
+                  logger.debug('Successfully sent message, registering for possible anwsers')
+                  // Timeout for repsonse
+                  let readTimeout = setTimeout(() => {
+                    logger.error("BLE Outbound response Timeout")
                     readCharacteristic?.removeAllListeners
-                    cancel()
+                    _cancel()
+                    reject('BLE Outbound Timeout')
+                  }, timeoutResponse, 'BLE Device response timeout');
+                  // React on events
+                  readCharacteristic?.on('read', (data: Buffer, isNotification: boolean) => {
+                    readCharacteristic?.readAsync().then((value: Buffer) => {
+                      logger.debug('Got read event: ' + value.toString('utf8'))
+                      _this.inboundCB(value)
+                      readCharacteristic?.removeAllListeners
+                      _cancel()
+                    })
                   })
                   readCharacteristic?.subscribeAsync().then(_ => {
-                    _this.connected = {
-                      peripheral: discoveredPeripheral,
-                      readCharacteristic: readCharacteristic!,
-                    }
                     clearTimeout(timeoutId)
                     resolve()
-                  }).catch (_ => {
-                    cancel()
+                  }).catch(_ => {
+                    _cancel()
                     reject()
                   })
                 })
               } else {
                 logger.debug('Error while searching for expected characteristics')
-                cancel()
+                _cancel()
                 reject()
               }
             }).catch((error): void => {
               logger.error("BLE endpoint does not expose expected service/characteristic: " + error)
-              cancel()
+              _cancel()
               reject()
             })
           })
