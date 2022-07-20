@@ -109,6 +109,9 @@ export class BleTransport {
         return this.central?.sendMessage(uuid, payload) ?? new Promise((_, reject) => { reject('no central device configured') })
       case BLEMode.Both:
         // TODO: This needs some switching logic, looking up for active connections on peripheral
+        if (uuid == "ble://central") {
+          return this.peripheral?.sendMessage(uuid, payload) ?? new Promise((_, reject) => { reject('no central device configured') })
+        }
         return this.central?.sendMessage(uuid, payload) ?? new Promise((_, reject) => { reject('no central device configured') })
       default:
         this.logger.error('Unexpected BLE Mode while sending: ', this.mode)

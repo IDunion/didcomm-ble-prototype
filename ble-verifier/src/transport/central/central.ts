@@ -108,6 +108,7 @@ export class TransportCentral {
                   readCharacteristic?.on('read', (data: Buffer, isNotification: boolean) => {
                     readCharacteristic?.readAsync().then((value: Buffer) => {
                       logger.debug('Got read event: ' + value.toString('utf8'))
+                      clearTimeout(readTimeout)
                       _this.inboundCB(value)
                       readCharacteristic?.removeAllListeners
                       _cancel()
