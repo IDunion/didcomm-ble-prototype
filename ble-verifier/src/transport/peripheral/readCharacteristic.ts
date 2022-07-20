@@ -1,18 +1,26 @@
-import Bleno from '@abandonware/bleno'
+import { Characteristic } from '@abandonware/bleno'
+import type { Logger } from '@aries-framework/core'
 
-export class didcommReadCharacteristic extends Bleno.Characteristic {
+export class didcommReadCharacteristic extends Characteristic {
   private resolveFunc: any
+  private logger!: Logger
+  private _updateCB: ((data: Buffer) => void) | null
 
-  constructor(uuid: string) {
+  constructor(uuid: string, logger: Logger) {
     super({
       uuid: uuid,
-      properties: ['read'],
-      value: Buffer.from('')
+      properties: ['notify', 'read'],
+      value: null,
     });
+    this.logger = logger;
+    this._updateCB = null
   }
 
   private setMessage(value: string): void {
     this.value = Buffer.from(value);
+    if(this._updateCB) {
+      this._updateCB(this.value)
+    }
   }
 
   private callback(offset: number) {
@@ -24,7 +32,7 @@ export class didcommReadCharacteristic extends Bleno.Characteristic {
 
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
     this.callback(offset)
-    callback(Bleno.Characteristic.RESULT_SUCCESS, this.value!);
+    callback(Characteristic.RESULT_SUCCESS, this.value!);
   }
 
   public sendMessage(payload: string): Promise<void> {
@@ -34,6 +42,7 @@ export class didcommReadCharacteristic extends Bleno.Characteristic {
     const readTimeout = new Promise<void>((_, reject) => {
       timeoutId = setTimeout(() => {
         this.resolveFunc = null
+        this.setMessage('')
         reject('BLE Outbound Timeout')
       }, 10000, 'BLE Device discovery timeout');
     });
@@ -42,4 +51,14 @@ export class didcommReadCharacteristic extends Bleno.Characteristic {
     });
     return Promise.race([readTimeout, readPromise]);
   }
+
+  onSubscribe(maxValueSize: number, updateCB: (data: Buffer) => void) {
+    this.logger.debug('ReadCharacteristic - onSubscribe');
+    this._updateCB = updateCB;
+  };
+  
+  onUnsubscribe() {
+    this.logger.debug('ReadCharacteristic - onUnsubscribe');
+    this._updateCB = null;
+  };
 }

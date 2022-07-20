@@ -24,8 +24,8 @@ export class TransportPeripheral {
 
     this.logger = logger
 
-    this.readChacateristic = new didcommReadCharacteristic(this.readCharacteristicUUID);
-    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, inboundCB);
+    this.readChacateristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger);
+    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, inboundCB, logger);
 
     this.start();
   }

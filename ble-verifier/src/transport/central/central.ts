@@ -1,13 +1,19 @@
 import type { Logger } from '@aries-framework/core'
 import noble = require('@abandonware/noble')
 
+interface ConncetedDevice {
+  peripheral: noble.Peripheral
+  readCharacteristic: noble.Characteristic
+  timeoutID?: NodeJS.Timeout
+}
+
 export class TransportCentral {
   private readCharacteristicUUID: string
   private writeCharacteristicUUID: string
   private serviceUUID: string
 
   private logger!: Logger
-  private connected: noble.Peripheral[] = []
+  private connected?: ConncetedDevice
 
   private inboundCB: (data?: Buffer) => void
 
@@ -45,7 +51,7 @@ export class TransportCentral {
         discoveredPeripheral.disconnectAsync()
       }
       noble.stopScanningAsync()
-      noble.removeAllListeners()
+      noble.removeAllListeners('discover')
       noble.cancelConnect(deviceUUID)
     }
     const discoveryTimeout = new Promise<void>((_, reject) => {
@@ -81,20 +87,36 @@ export class TransportCentral {
             discoveredPeripheral.discoverSomeServicesAndCharacteristicsAsync([service], [readChar, writeChar]).then((serviceAndChars) => {
               logger.debug('Successfuly found expected Services/Characteristics')
               let characteristics = serviceAndChars.characteristics
-              characteristics.find(element => element.uuid == readChar)
-              if (characteristics.length > 0) {
+              let writeCharacteristic = characteristics.find(element => element.uuid == writeChar)
+              let readCharacteristic = characteristics.find(element => element.uuid == readChar)
+              if (writeCharacteristic && readCharacteristic) {
                 const data = Buffer.from(payload)
                 logger.debug('Sending ' + payload)
-                characteristics[0].writeAsync(data, false).catch((error): void => {
+                writeCharacteristic.writeAsync(data, true).catch((error): void => {
                   logger.error("Error writing to characteristic: " + error)
                   cancel()
                   reject()
                 }).then(() => {
-                  _this.connected.push(discoveredPeripheral)
-                  resolve()
+                  logger.debug('Successfully sent message')
+                  readCharacteristic?.on('read', (data: Buffer, isNotification: boolean) => {
+                    _this.inboundCB(data)
+                    readCharacteristic?.removeAllListeners
+                    cancel()
+                  })
+                  readCharacteristic?.subscribeAsync().then(_ => {
+                    _this.connected = {
+                      peripheral: discoveredPeripheral,
+                      readCharacteristic: readCharacteristic!,
+                    }
+                    clearTimeout(timeoutId)
+                    resolve()
+                  }).catch (_ => {
+                    cancel()
+                    reject()
+                  })
                 })
               } else {
-                logger.debug('Error while searching for expected characteristic')
+                logger.debug('Error while searching for expected characteristics')
                 cancel()
                 reject()
               }
