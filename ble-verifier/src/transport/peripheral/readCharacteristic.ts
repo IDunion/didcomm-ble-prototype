@@ -20,13 +20,14 @@ export class didcommReadCharacteristic extends Characteristic {
 
   private setMessage(value: string): void {
     this.value = Buffer.from(value);
+    this.logger.debug('Set value: ' + this.value.toString())
     if(this._updateCB) {
+      this.logger.debug('Notifying listener')
       this._updateCB(this.value)
     }
-    this.logger.debug('Set value: ' + this.value.toString())
   }
 
-  private callback() {
+  private resolve() {
     if (this.resolveFunc) {
       this.resolveFunc()
       this.resolveFunc = null
@@ -35,8 +36,12 @@ export class didcommReadCharacteristic extends Characteristic {
 
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
     this.logger.debug('Getting Read Request - offset: ' + offset)
+    if(!this.value) {
+      callback(Characteristic.RESULT_SUCCESS, Buffer.from(''));
+      return
+    }
     if(offset + Bleno.mtu >= this.value!.byteLength) {
-      this.callback()
+      this.resolve()
     }
     callback(Characteristic.RESULT_SUCCESS, this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength)));
   }
@@ -48,7 +53,6 @@ export class didcommReadCharacteristic extends Characteristic {
     const readTimeout = new Promise<void>((_, reject) => {
       timeoutId = setTimeout(() => {
         this.resolveFunc = null
-        this.setMessage('')
         reject('BLE Outbound Timeout')
       }, 10000, 'BLE Device discovery timeout');
     });

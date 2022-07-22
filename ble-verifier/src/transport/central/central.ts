@@ -3,19 +3,16 @@ import noble = require('@abandonware/noble')
 
 interface ConncetedDevice {
   peripheral: noble.Peripheral
-  readCharacteristic: noble.Characteristic
-  timeoutID?: NodeJS.Timeout
+  writeCharactistic: noble.Characteristic
 }
 
 export class TransportCentral {
   private readCharacteristicUUID: string
   private writeCharacteristicUUID: string
   private serviceUUID: string
-
   private logger!: Logger
-
   private inboundCB: (data?: Buffer) => void
-
+  private connectedDevices: Map<string, ConncetedDevice>
 
   constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void) {
     this.readCharacteristicUUID = parseUUID(readCharacteristic)
@@ -23,18 +20,20 @@ export class TransportCentral {
     this.serviceUUID = parseUUID(serviceUUID)
     this.logger = logger
     this.inboundCB = inboundCB
+    this.connectedDevices = new Map<string, ConncetedDevice>();
   }
 
   public async stop(): Promise<void> {
     await noble.stopScanningAsync();
-    await noble.removeAllListeners();
+    noble.removeAllListeners();
     noble.reset()
   }
 
   public sendMessage(uuid: string, payload: string): Promise<void> {
     // Convert to noble UUID format
     const deviceUUID = parseUUID(uuid)
-    this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
+    const data = Buffer.from(payload)
+    const connectedDevices = this.connectedDevices
     const logger = this.logger
     const service = this.serviceUUID
     const readChar = this.readCharacteristicUUID
@@ -53,24 +52,42 @@ export class TransportCentral {
       noble.removeAllListeners('discover')
       noble.cancelConnect(deviceUUID)
     }
+
+    if(connectedDevices.has(deviceUUID)) {
+      this.logger.debug('Already connected to device, no need for discovery')
+      let device = connectedDevices.get(deviceUUID)
+      return new Promise<void>(function (resolve, reject) {
+        device?.writeCharactistic.writeAsync(data, true).catch((error): void => {
+          logger.error('Error writing to characteristic: ' + error)
+          cancel()
+          reject()
+        }).then(_ => {
+          logger.debug('Successfully sent message')
+          resolve()
+        })
+      })
+    }
+    this.logger.debug('Searching for BLE device with UUID: ' + deviceUUID)
+
     const discoveryTimeout = new Promise<void>((_, reject) => {
       timeoutId = setTimeout(() => {
-        logger.error("BLE Outbound Timeout")
+        logger.error("BLE Discovery Timeout")
         cancel()
-        reject('BLE Outbound Timeout')
+        reject('BLE Discovery Timeout')
       }, timeoutDiscovery, 'BLE Device discovery timeout');
     });
+
     const _this = this;
     const discovery = new Promise<void>(function (resolve, reject) {
       noble.on('discover', async (peripheral: noble.Peripheral) => {
-        discoveredPeripheral = peripheral
         logger.debug('Found BLE device ' + peripheral.uuid)
-        if (discoveredPeripheral.uuid === deviceUUID) {
+        if (peripheral.uuid === deviceUUID) {
           let _cancel = () => {
             clearTimeout(timeoutId)
             cancel()
           }
           // device UUID and service UUID match
+          discoveredPeripheral = peripheral
           logger.debug('BLE device matches expected endpoint')
           await noble.stopScanningAsync().catch((error): void => {
             logger.error('Could not stop scanning: ' + error)
@@ -89,7 +106,6 @@ export class TransportCentral {
               let writeCharacteristic = characteristics.find(element => element.uuid == writeChar)
               let readCharacteristic = characteristics.find(element => element.uuid == readChar)
               if (writeCharacteristic && readCharacteristic) {
-                const data = Buffer.from(payload)
                 logger.debug('Sending ' + payload)
                 writeCharacteristic.writeAsync(data, true).catch((error): void => {
                   logger.error("Error writing to characteristic: " + error)
@@ -97,22 +113,26 @@ export class TransportCentral {
                   reject()
                 }).then(() => {
                   logger.debug('Successfully sent message, registering for possible anwsers')
+                  // Remember device
+                  connectedDevices.set(deviceUUID,{
+                    peripheral: discoveredPeripheral,
+                    writeCharactistic: writeCharacteristic!,
+                  })
                   // Timeout for repsonse
                   let readTimeout = setTimeout(() => {
-                    logger.error("BLE Outbound response Timeout")
+                    logger.debug("waited 10 seconds for incomign messages, closing connection")
                     readCharacteristic?.removeAllListeners
+                    connectedDevices.delete(deviceUUID)
                     _cancel()
-                    reject('BLE Outbound Timeout')
                   }, timeoutResponse, 'BLE Device response timeout');
                   // React on events
-                  readCharacteristic?.on('read', (data: Buffer, isNotification: boolean) => {
-                    readCharacteristic?.readAsync().then((value: Buffer) => {
-                      logger.debug('Got read event: ' + value.toString('utf8'))
-                      clearTimeout(readTimeout)
-                      _this.inboundCB(value)
-                      readCharacteristic?.removeAllListeners
-                      _cancel()
-                    })
+                  readCharacteristic?.on('read', (_: Buffer, isNotification: boolean) => {
+                    if(isNotification){
+                      readCharacteristic?.readAsync().then((value: Buffer) => {
+                        logger.debug('read from Characteristic: ' + value.toString('utf8'))
+                        _this.receieveMessage(value)
+                      })
+                    }
                   })
                   readCharacteristic?.subscribeAsync().then(_ => {
                     clearTimeout(timeoutId)
