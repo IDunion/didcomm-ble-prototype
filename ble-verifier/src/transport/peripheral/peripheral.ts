@@ -1,3 +1,7 @@
+// Copyright (c) 2022 - for information on the respective copyright owner see the NOTICE file or the repository https://github.com/idunion/didcomm-ble-prototype.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import Bleno from '@abandonware/bleno'
 import type { Logger, OutboundPackage } from '@aries-framework/core'
 import { didcommReadCharacteristic } from './readCharacteristic'
