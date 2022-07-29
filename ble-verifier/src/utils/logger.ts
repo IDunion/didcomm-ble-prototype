@@ -2,6 +2,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// This source code is derived from https://github.com/animo/animo-demo/blob/main/server/src/logger.ts
+// from ANIMO SOLUTIONS, licensed under the APACHE-2.0 license (same as this repository)
+
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ILogObject } from 'tslog'
