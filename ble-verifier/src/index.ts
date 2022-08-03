@@ -39,7 +39,7 @@ const run = async () => {
   logger.debug('Configuratrion: ' + config)
 
   // Set genesis transaction from either genesis url, network name or default to idunion
-  let network = "idunion"
+  let network = "idunion_test"
   let genesisTransactions = utils.gensis.get(network)
 
   if (config.genesisurl) {
