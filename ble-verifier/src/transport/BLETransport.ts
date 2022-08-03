@@ -1,3 +1,7 @@
+// Copyright (c) 2022 - for information on the respective copyright owner see the NOTICE file or the repository https://github.com/idunion/didcomm-ble-prototype.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import { Logger } from "@aries-framework/core";
 import { BLEInboundTransport } from "./BLEInboundTransport";
 import { BLEOutboundTransport } from "./BLEOutboundTransport";

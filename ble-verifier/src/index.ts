@@ -1,3 +1,7 @@
+// Copyright (c) 2022 - for information on the respective copyright owner see the NOTICE file or the repository https://github.com/idunion/didcomm-ble-prototype.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import {
   Agent, AutoAcceptCredential, HttpOutboundTransport,
   InitConfig, LogLevel, WsOutboundTransport
@@ -35,7 +39,7 @@ const run = async () => {
   logger.debug('Configuratrion: ' + config)
 
   // Set genesis transaction from either genesis url, network name or default to idunion
-  let network = "idunion"
+  let network = "idunion_test"
   let genesisTransactions = utils.gensis.get(network)
 
   if (config.genesisurl) {
