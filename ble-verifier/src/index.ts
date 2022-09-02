@@ -15,6 +15,7 @@ import { Config } from './utils/config'
 import { BleTransport } from './transport/BLETransport'
 import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
+import { Controller } from './controller/controller'
 
 
 const logger = new TestLogger(process.env.NODE_ENV ? LogLevel.error : LogLevel.debug)
@@ -129,6 +130,22 @@ const run = async () => {
   }
 
   await agent.initialize()
+
+  // Register business logic
+  // TODO: move into config
+  new Controller(logger, agent, {
+    attributes: [{
+      name: 'First name',
+      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
+    }, {
+      name: 'Family name',
+      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
+    }, {
+      name: 'Address street',
+      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
+    }
+    ]
+  })
 
   // Admin webservice 
   const webserver = new AdminWebServer(logger, agent)
