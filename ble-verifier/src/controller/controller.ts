@@ -15,6 +15,7 @@ export class Controller {
     this.logger = logger
     this.agent = agent
     this.proofConfig = proofConfig
+    this.onConnect()
   }
 
   private buildProofAttributes(): Map<string, ProofAttributeInfo> {
@@ -50,7 +51,7 @@ export class Controller {
       ConnectionEventTypes.ConnectionStateChanged, (event) => {
         let record = event.payload.connectionRecord
         if (!record.isReady) {
-          this.logger.debug('Connection not ready yet.')
+          this.logger.debug('Connection not ready yet: ' + record.id)
           return
         }
         let id = record.id
