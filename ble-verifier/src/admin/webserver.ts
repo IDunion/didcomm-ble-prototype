@@ -26,7 +26,7 @@ export class AdminWebServer {
     app.use(bodyParser.json());
     this.app = app
 
-    // Regsiter default routes
+    // Register default routes
     const receiveInvitation = new AdminReceiveInvitation(logger, agent)
     this.registerRoute(receiveInvitation)
     const createInvitation = new AdminCreateInvitation(logger, agent)

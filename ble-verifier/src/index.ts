@@ -41,7 +41,7 @@ const run = async () => {
 
   // Set genesis transaction from either genesis url, network name or default to idunion
   let network = "idunion_test"
-  let genesisTransactions = utils.gensis.get(network)
+  let genesisTransactions = utils.genesis.get(network)
 
   if (config.genesisurl) {
     logger.debug('Getting genesis file from url: ' + config.genesisurl)
@@ -59,8 +59,8 @@ const run = async () => {
   } else {
     if (config.network) {
       let networkString: string = config.network
-      if (utils.gensis.has(networkString)) {
-        genesisTransactions = utils.gensis.get(networkString.toLowerCase())
+      if (utils.genesis.has(networkString)) {
+        genesisTransactions = utils.genesis.get(networkString.toLowerCase())
         network = networkString
         logger.debug('Setting genesis transaction to predefined network: ' + network)
       } else {
@@ -88,7 +88,7 @@ const run = async () => {
       return;
     }
 
-    BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristicwrite, config.blecharacteristiread, logger)
+    BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger)
     BLEAddress = await BLETransport.getDeviceID();
 
     logger.debug("Got BLEAddress:", BLEAddress)
