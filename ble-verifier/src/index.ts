@@ -16,6 +16,8 @@ import { BleTransport } from './transport/BLETransport'
 import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
 import { Controller } from './controller/controller'
+import * as mqtt from "mqtt"
+
 
 
 const logger = new TestLogger(process.env.NODE_ENV ? LogLevel.error : LogLevel.debug)
@@ -131,6 +133,23 @@ const run = async () => {
 
   await agent.initialize()
 
+  // MQTT Client
+  const mqttClientOptions: mqtt.IClientOptions = {
+    // Clean session
+    clean: true,
+    connectTimeout: 4000,
+    // Authentication
+    clientId: 'BLE-Prototype',
+  }
+
+  const mqttClient: mqtt.MqttClient = mqtt.connect(config.brokerUrl, mqttClientOptions)
+  mqttClient.on('connect', function () {
+    logger.debug("MQTT connected")
+
+    mqttClient.publish('eno/raw/vin', 'F4 07 22 DD C4')
+  })
+
+
   // Register business logic
   // TODO: move into config
   new Controller(logger, agent, {
@@ -145,7 +164,8 @@ const run = async () => {
       credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
     }
     ]
-  })
+  }, mqttClient)
+
 
   // Admin webservice 
   const webserver = new AdminWebServer(logger, agent)
