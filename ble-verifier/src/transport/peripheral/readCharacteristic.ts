@@ -74,6 +74,7 @@ export class didcommReadCharacteristic extends Characteristic {
     const readTimeout = new Promise<void>((_, reject) => {
       timeoutId = setTimeout(() => {
         this.resolveFunc = null
+        this.previousOffset = 0
         reject('BLE Outbound Timeout')
       }, 10000, 'BLE Device discovery timeout');
     });

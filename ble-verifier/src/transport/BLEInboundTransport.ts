@@ -30,7 +30,6 @@ export class BLEInboundTransport implements InboundTransport {
       this.logger.debug("MESSAGE PROCESSED")
       this.message = ""
     } catch (error) {
-
       if (error instanceof AriesFrameworkError) {
         this.message = ""
       }
