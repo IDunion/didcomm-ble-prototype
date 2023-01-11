@@ -14,7 +14,7 @@ export class TransportPeripheral {
   private writeCharacteristicUUID: string
   private serviceUUID: string
 
-  private readChacateristic: didcommReadCharacteristic
+  private readCharacteristic: didcommReadCharacteristic
   private writeCharacteristic: didcommWriteCharacteristic
 
   private logger!: Logger
@@ -28,7 +28,7 @@ export class TransportPeripheral {
 
     this.logger = logger
 
-    this.readChacateristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger);
+    this.readCharacteristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger);
     this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, inboundCB, logger);
 
     this.start();
@@ -81,7 +81,7 @@ export class TransportPeripheral {
     Bleno.on('advertisingStart', (error?: Error | null) => {
       if (!error) {
         Bleno.setServices(
-          [new Bleno.PrimaryService({ uuid: this.serviceUUID, characteristics: [this.readChacateristic, this.writeCharacteristic] })],
+          [new Bleno.PrimaryService({ uuid: this.serviceUUID, characteristics: [this.readCharacteristic, this.writeCharacteristic] })],
           () => { }
         );
       }
@@ -105,6 +105,6 @@ export class TransportPeripheral {
   }
 
   public sendMessage(uuid: string, payload: string): Promise<void> {
-    return this.readChacateristic.sendMessage(payload)
+    return this.readCharacteristic.sendMessage(payload)
   }
 }
