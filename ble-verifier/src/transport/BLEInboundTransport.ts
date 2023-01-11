@@ -2,12 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Agent, Logger, InboundTransport } from '@aries-framework/core'
+import { Agent, Logger, InboundTransport, AriesFrameworkError } from '@aries-framework/core'
 import { AgentConfig } from '@aries-framework/core'
 
 export class BLEInboundTransport implements InboundTransport {
   private agent!: Agent
   private logger!: Logger
+  private message: string = ""
 
   public async start(agent: Agent): Promise<void> {
     const agentConfig = agent.injectionContainer.resolve(AgentConfig)
@@ -23,9 +24,17 @@ export class BLEInboundTransport implements InboundTransport {
   // Callback for write request on bleCharacateristic
   public async receiveMessage(data: Buffer) {
     try {
-      const encryptedMessage = JSON.parse(data.toString('utf8'))
+      this.message += data.toString('utf8');
+      const encryptedMessage = JSON.parse(this.message)
       await this.agent.receiveMessage(encryptedMessage)
+      this.logger.debug("MESSAGE PROCESSED")
+      this.message = ""
     } catch (error) {
+
+      if (error instanceof AriesFrameworkError) {
+        this.message = ""
+      }
+
       this.logger.debug('Error processing inbound message: ' + error)
       this.logger.debug(data.toString('utf8'))
     }
