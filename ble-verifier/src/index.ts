@@ -18,8 +18,6 @@ import * as utils from './utils/utils'
 import { Controller } from './controller/controller'
 import * as mqtt from "mqtt"
 
-
-
 const logger = new TestLogger(process.env.NODE_ENV ? LogLevel.error : LogLevel.debug)
 
 process.on('unhandledRejection', (error) => {
@@ -140,13 +138,13 @@ const run = async () => {
     connectTimeout: 4000,
     // Authentication
     clientId: 'BLE-Prototype',
+    // Trying to reconnect
+    reconnectPeriod: 3000,
   }
 
   const mqttClient: mqtt.MqttClient = mqtt.connect(config.brokerUrl, mqttClientOptions)
   mqttClient.on('connect', function () {
     logger.debug("MQTT connected")
-
-    mqttClient.publish('eno/raw/vin', 'F4 07 22 DD C4')
   })
 
 
@@ -154,14 +152,17 @@ const run = async () => {
   // TODO: move into config
   new Controller(logger, agent, {
     attributes: [{
-      name: 'First name',
-      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
+      name: 'car',
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
     }, {
-      name: 'Family name',
-      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
+      name: 'owner',
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
     }, {
-      name: 'Address street',
-      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
+      name: 'rights',
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    }, {
+      name: 'source',
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
     }
     ]
   }, mqttClient)
