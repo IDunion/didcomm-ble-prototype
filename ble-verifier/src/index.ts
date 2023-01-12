@@ -133,7 +133,7 @@ const run = async () => {
 
   // Register business logic
   // TODO: move into config
-  new Controller(logger, agent, {
+/*    new Controller(logger, agent, {
     attributes: [{
       name: 'First name',
       credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
@@ -145,7 +145,7 @@ const run = async () => {
       credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
     }
     ]
-  })
+  })  */
 
   // Admin webservice 
   const webserver = new AdminWebServer(logger, agent)

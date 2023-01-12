@@ -11,6 +11,7 @@ export class didcommReadCharacteristic extends Characteristic {
   private logger!: Logger
   private _updateCB: ((data: Buffer) => void) | null
   private previousOffset: number = 0
+  private bytesRead: Buffer = new Buffer([])
 
   constructor(uuid: string, logger: Logger) {
     super({
@@ -43,10 +44,14 @@ export class didcommReadCharacteristic extends Characteristic {
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
     let isResolved = false
     
-    if (this.previousOffset > offset) {
+/*     if (this.previousOffset > offset) {
       offset = this.previousOffset
-    }
+    } */
     
+    offset = this.bytesRead.byteLength
+/*     if (offset != 0)
+      offset -= 1 */
+
     this.logger.debug('Getting Read Request - offset: ' + offset)
     if(!this.value) {
       callback(Characteristic.RESULT_SUCCESS, Buffer.from(''));
@@ -57,14 +62,19 @@ export class didcommReadCharacteristic extends Characteristic {
       this.resolve()
     }
     
-    if (isResolved) {
+/*     if (isResolved) {
       this.previousOffset = 0
     } 
     else {
       this.previousOffset += Bleno.mtu -1
-    }
+    } */
 
-    callback(Characteristic.RESULT_SUCCESS, this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength)));
+
+    var bytesRead = this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength))
+    
+
+    callback(Characteristic.RESULT_SUCCESS, bytesRead);
+    this.bytesRead = Buffer.concat([this.bytesRead, bytesRead])
   }
 
   public sendMessage(payload: string): Promise<void> {
