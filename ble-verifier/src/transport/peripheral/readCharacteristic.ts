@@ -34,6 +34,7 @@ export class didcommReadCharacteristic extends Characteristic {
   }
 
   private resolve() {
+    // TODO: Somehow this doesnt reset properly, which results in not being able to send consecutive messages.
     this.bytesRead = new Buffer([])
 
     if (this.resolveFunc) {
