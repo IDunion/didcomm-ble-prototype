@@ -44,13 +44,7 @@ export class didcommReadCharacteristic extends Characteristic {
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
     let isResolved = false
     
-/*     if (this.previousOffset > offset) {
-      offset = this.previousOffset
-    } */
-    
     offset = this.bytesRead.byteLength
-/*     if (offset != 0)
-      offset -= 1 */
 
     this.logger.debug('Getting Read Request - offset: ' + offset)
     if(!this.value) {
@@ -62,17 +56,12 @@ export class didcommReadCharacteristic extends Characteristic {
       this.resolve()
     }
     
-/*     if (isResolved) {
-      this.previousOffset = 0
-    } 
-    else {
-      this.previousOffset += Bleno.mtu -1
-    } */
-
+    if (isResolved){
+      bytesRead = new Buffer([])
+    }
 
     var bytesRead = this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength))
     
-
     callback(Characteristic.RESULT_SUCCESS, bytesRead);
     this.bytesRead = Buffer.concat([this.bytesRead, bytesRead])
   }
