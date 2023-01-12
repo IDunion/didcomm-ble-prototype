@@ -34,6 +34,8 @@ export class didcommReadCharacteristic extends Characteristic {
   }
 
   private resolve() {
+    this.bytesRead = new Buffer([])
+
     if (this.resolveFunc) {
       this.resolveFunc()
       this.resolveFunc = null
@@ -42,8 +44,6 @@ export class didcommReadCharacteristic extends Characteristic {
   }
 
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
-    let isResolved = false
-    
     offset = this.bytesRead.byteLength
 
     this.logger.debug('Getting Read Request - offset: ' + offset)
@@ -52,16 +52,10 @@ export class didcommReadCharacteristic extends Characteristic {
       return
     }
     if(offset + Bleno.mtu >= this.value!.byteLength) {
-      isResolved = true
       this.resolve()
-    }
-    
-    if (isResolved){
-      bytesRead = new Buffer([])
     }
 
     var bytesRead = this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength))
-    
     callback(Characteristic.RESULT_SUCCESS, bytesRead);
     this.bytesRead = Buffer.concat([this.bytesRead, bytesRead])
   }
@@ -75,7 +69,7 @@ export class didcommReadCharacteristic extends Characteristic {
         this.resolveFunc = null
         this.previousOffset = 0
         reject('BLE Outbound Timeout')
-      }, 10000, 'BLE Device discovery timeout');
+      }, 20000, 'BLE Device discovery timeout');
     });
     const readPromise = new Promise<void>((resolve, _) => {
       this.resolveFunc = resolve
