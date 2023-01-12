@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <NoWarn>CS1998</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'mediator' " />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.AspNetCore\Hyperledger.Aries.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.Routing.Mediator\Hyperledger.Aries.Routing.Mediator.csproj" />
+  </ItemGroup>
+
+</Project>

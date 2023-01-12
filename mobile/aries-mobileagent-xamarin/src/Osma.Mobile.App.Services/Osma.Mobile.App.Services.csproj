@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Configurations>Debug;Release;Gorilla</Configurations>
+    <AssemblyName>Osma.Mobile.App.Services</AssemblyName>
+    <RootNamespace>Osma.Mobile.App.Services</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Gorilla|AnyCPU' ">
+    <IntermediateOutputPath>obj\Gorilla</IntermediateOutputPath>
+    <DebugType></DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Gorilla</OutputPath>
+    <DefineConstants></DefineConstants>
+    <NoWarn></NoWarn>
+    <NoStdLib>false</NoStdLib>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.2" />
+    <PackageReference Include="Autofac" Version="5.1.2" />
+    <PackageReference Include="Hyperledger.Indy.Sdk" Version="1.11.1" />
+    <PackageReference Include="Plugin.BluetoothLE" Version="6.3.0.19" />
+    <PackageReference Include="ReactiveUI" Version="16.3.10" />
+    <PackageReference Include="Shiny" Version="2.3.0.2936-preview" />
+    <PackageReference Include="Shiny.BluetoothLE" Version="2.3.0.2936-preview" />
+    <PackageReference Include="Shiny.BluetoothLE.Hosting" Version="2.3.0.2936-preview" />
+    <PackageReference Include="Shiny.Framework" Version="1.3.0.93" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+</Project>

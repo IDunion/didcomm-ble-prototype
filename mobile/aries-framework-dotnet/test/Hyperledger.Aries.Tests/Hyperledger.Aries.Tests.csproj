@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Project</StartAction>
+    <ExternalConsole>true</ExternalConsole>
+    <EnvironmentVariables>
+      <Variable name="RUST_LOG" value="trace" />
+    </EnvironmentVariables>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="pool_genesis.txn">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsDependencyInjectionVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageReference Include="Moq" Version="$(MoqVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitRunnerVisualstudioVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="$(MicrosoftAspNetCoreHttpVersion)" />
+    <PackageReference Include="NLog.Config" Version="$(NLogConfigVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Hyperledger.Aries.AspNetCore\Hyperledger.Aries.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Hyperledger.Aries.TestHarness\Hyperledger.Aries.TestHarness.csproj" />
+    <ProjectReference Include="..\..\src\Hyperledger.Aries.Payments.SovrinToken\Hyperledger.Aries.Payments.SovrinToken.csproj" />
+  </ItemGroup>
+</Project>

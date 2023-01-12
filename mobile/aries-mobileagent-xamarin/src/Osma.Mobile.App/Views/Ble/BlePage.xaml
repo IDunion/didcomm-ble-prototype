@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:ble="clr-namespace:Osma.Mobile.App.ViewModels.Ble;assembly=Osma.Mobile.App"
+             Title="BLE"
+             x:Class="Osma.Mobile.App.Views.Ble.BlePage"
+             x:DataType="ble:BleViewModel">
+    <StackLayout Padding="20,0">
+        <StackLayout HorizontalOptions="CenterAndExpand"
+                     Margin="0,15"
+                     Orientation="Horizontal">
+            <Label Text="BLE Server is"/>
+            <Label FontAttributes="Bold" >
+                <Label.Triggers>
+                    <DataTrigger Binding="{Binding IsBleServerOn}"
+                                 TargetType="Label"
+                                 Value="True">
+                        <Setter Property="Text" Value="ON"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsBleServerOn}"
+                                 TargetType="Label"
+                                 Value="False">
+                        <Setter Property="Text" Value="OFF"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </StackLayout>
+        <Button BackgroundColor="Red"
+                TextColor="White"
+                HorizontalOptions="FillAndExpand"
+                Command="{Binding ToggleBleServerCommand}">
+            <Button.Triggers>
+                <DataTrigger Binding="{Binding IsBleServerOn}"
+                             Value="True"
+                             TargetType="Button">
+                    <Setter Property="Text" Value="Turn BLE Server Off"/>
+                    <Setter Property="BackgroundColor" Value="Red"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsBleServerOn}"
+                             Value="False"
+                             TargetType="Button">
+                    <Setter Property="Text" Value="Turn BLE Server On"/>
+                    <Setter Property="BackgroundColor" Value="Green"/>
+                </DataTrigger>
+            </Button.Triggers>
+        </Button>
+    </StackLayout>
+</ContentPage>
