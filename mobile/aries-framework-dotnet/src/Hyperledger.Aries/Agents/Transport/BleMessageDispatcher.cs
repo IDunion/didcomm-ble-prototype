@@ -6,13 +6,10 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Hyperledger.Aries.Extensions;
-using Hyperledger.Aries.Utils;
 using ReactiveUI;
 using Shiny;
 using Shiny.BluetoothLE;
 using Shiny.BluetoothLE.Managed;
-using Xamarin.Forms;
 
 namespace Hyperledger.Aries.Agents.Transport
 {

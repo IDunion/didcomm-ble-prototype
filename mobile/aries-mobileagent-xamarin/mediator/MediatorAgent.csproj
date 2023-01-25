@@ -6,9 +6,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'mediator' " />
+  
   <ItemGroup>
-    <ProjectReference Include="..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.AspNetCore\Hyperledger.Aries.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.Routing.Mediator\Hyperledger.Aries.Routing.Mediator.csproj" />
+    <PackageReference Include="Hyperledger.Aries.AspNetCore" Version="1.6.4" />
+    <PackageReference Include="Hyperledger.Aries.Routing.Mediator" Version="1.6.2" />
   </ItemGroup>
 
 </Project>

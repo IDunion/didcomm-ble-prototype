@@ -5,15 +5,15 @@ VisualStudioVersion = 16.0.808.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatorAgent", "MediatorAgent.csproj", "{68E02C25-E9DB-4AF8-924B-D75055FF7193}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.Routing.Mediator", "..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.Routing.Mediator\Hyperledger.Aries.Routing.Mediator.csproj", "{09BCE5E3-63B2-491A-B5B1-90EC04F829D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.Routing.Mediator", "..\..\..\mobile\aries-framework-dotnet\src\Hyperledger.Aries.Routing.Mediator\Hyperledger.Aries.Routing.Mediator.csproj", "{09BCE5E3-63B2-491A-B5B1-90EC04F829D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries", "..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries\Hyperledger.Aries.csproj", "{6CD514AB-4ED8-4225-BBA3-50AEF525ED74}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries", "..\..\..\mobile\aries-framework-dotnet\src\Hyperledger.Aries\Hyperledger.Aries.csproj", "{6CD514AB-4ED8-4225-BBA3-50AEF525ED74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.Routing", "..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.Routing\Hyperledger.Aries.Routing.csproj", "{810D3B7F-AEFB-4F3B-9439-10E53174376F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.Routing", "..\..\..\mobile\aries-framework-dotnet\src\Hyperledger.Aries.Routing\Hyperledger.Aries.Routing.csproj", "{810D3B7F-AEFB-4F3B-9439-10E53174376F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.AspNetCore", "..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.AspNetCore\Hyperledger.Aries.AspNetCore.csproj", "{A338CAD4-4DA9-445A-8DF7-BB4430DC53DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.AspNetCore", "..\..\..\mobile\aries-framework-dotnet\src\Hyperledger.Aries.AspNetCore\Hyperledger.Aries.AspNetCore.csproj", "{A338CAD4-4DA9-445A-8DF7-BB4430DC53DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.AspNetCore.Contracts", "..\..\..\lissi-id\aries-framework-dotnet\src\Hyperledger.Aries.AspNetCore.Contracts\Hyperledger.Aries.AspNetCore.Contracts.csproj", "{C2A53378-596A-4EBF-B348-590E0E722F09}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperledger.Aries.AspNetCore.Contracts", "..\..\..\mobile\aries-framework-dotnet\src\Hyperledger.Aries.AspNetCore.Contracts\Hyperledger.Aries.AspNetCore.Contracts.csproj", "{C2A53378-596A-4EBF-B348-590E0E722F09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

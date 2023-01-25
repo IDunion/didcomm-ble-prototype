@@ -28,7 +28,6 @@
     <PackageReference Include="Microsoft.AppCenter.Crashes" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageReference Include="Plugin.BluetoothLE" Version="6.3.0.19" />
-    <PackageReference Include="ReactiveUI" Version="16.3.10" />
     <PackageReference Include="Rg.Plugins.Popup" Version="2.0.0.12" />
     <PackageReference Include="Shiny.BluetoothLE" Version="2.3.0.2936-preview" />
     <PackageReference Include="Shiny.BluetoothLE.Hosting" Version="2.3.0.2936-preview" />
