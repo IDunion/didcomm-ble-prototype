@@ -8,7 +8,7 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'mediator' " />
   
   <ItemGroup>
-    <PackageReference Include="Hyperledger.Aries.AspNetCore" Version="1.6.4" />
+    <PackageReference Include="Hyperledger.Aries.AspNetCore" Version="1.6.2" />
     <PackageReference Include="Hyperledger.Aries.Routing.Mediator" Version="1.6.2" />
   </ItemGroup>
 

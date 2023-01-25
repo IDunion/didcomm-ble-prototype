@@ -36,7 +36,7 @@ dazu ist in der Repo zu finden: LINK
 
 Zusammendfassend sind folgende Schritte zu beachten:
 
-1. Das Indy-SDK installieren: https://github.com/hyperledger/indy-sdk#installing-the-sdk 
+1. Das Indy-SDK installieren: https://github.com/hyperledger/indy-sdk#installing-the-sdk. The [libindy](https://repo.sovrin.org/windows/libindy/stable/1.9.0/) library (lib-folder) needs to be added to path
 2. Einen ngrok HTTP Tunnel über Port 5000 öffnen
 3. Die HTTP Adresse vom Tunnel in dem Mediator und in der App.xaml.cs als Endpoint definieren.
 4. Im Mediator Ordner über das Terminal "dotnet run" ausführen um den Mediator zu starten.
