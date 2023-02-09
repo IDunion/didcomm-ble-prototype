@@ -332,6 +332,7 @@
     <BundleResource Include="Resources\pool_transactions_builder_genesis" />
     <BundleResource Include="Resources\pool_transactions_sandbox_genesis" />
     <BundleResource Include="Resources\pool_transactions_live_genesis" />
+    <BundleResource Include="Resources\pool_transactions_idunion_test_genesis" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="..\..\libs\ios\libcrypto.a">

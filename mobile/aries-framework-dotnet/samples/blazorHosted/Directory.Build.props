@@ -34,7 +34,7 @@
     <MicrosoftCodeAnalysisFxCopAnalyzersVersion>3.0.0</MicrosoftCodeAnalysisFxCopAnalyzersVersion>
     <SystemConfigurationConfigurationManagerVersion>4.7.0</SystemConfigurationConfigurationManagerVersion>
     <SystemNetHttpJsonVersion>3.2.1</SystemNetHttpJsonVersion>
-    <SystemTextJsonVersion>4.7.2</SystemTextJsonVersion>
+    <SystemTextJsonVersion>5.0.0</SystemTextJsonVersion>
 
     <AutoMapperExtensionsMicrosoftDependencyInjectionVersion>7.0.0</AutoMapperExtensionsMicrosoftDependencyInjectionVersion>
     <AutoMapperVersion>10.0.0</AutoMapperVersion>

@@ -167,6 +167,7 @@
     <AndroidAsset Include="Assets\pool_transactions_builder_genesis" />
     <AndroidAsset Include="Assets\pool_transactions_sandbox_genesis" />
     <AndroidAsset Include="Assets\pool_transactions_live_genesis" />
+    <AndroidAsset Include="Assets\pool_transactions_idunion_test_genesis" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\Tabbar.axml" />
