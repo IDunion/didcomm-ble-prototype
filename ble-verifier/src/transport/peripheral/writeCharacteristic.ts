@@ -21,6 +21,7 @@ export class didcommWriteCharacteristic extends Characteristic {
 
   onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: any) {
     this.logger.debug('Received Write Request for BLE peripheral')
+    this.logger.debug(data.toString())
     this.callback(data)
     callback(Characteristic.RESULT_SUCCESS);
   }

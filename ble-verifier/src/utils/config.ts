@@ -10,4 +10,5 @@ export interface Config {
     blecharacteristiread?: string,
     bleservice?: string,
     blemode?: string,
+    brokerUrl: string,
 }

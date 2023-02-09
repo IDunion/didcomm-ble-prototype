@@ -5,16 +5,19 @@
 import { Agent, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, ProofAttributeInfo, ProofRecord } from '@aries-framework/core'
 import { TestLogger } from '../utils/logger'
 import { ProofConfig } from './config'
+import { Client } from "mqtt"
 
 export class Controller {
   private logger: TestLogger
   private agent: Agent
   private proofConfig: ProofConfig
+  private mqttClient: Client
 
-  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig) {
+  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client) {
     this.logger = logger
     this.agent = agent
     this.proofConfig = proofConfig
+    this.mqttClient = mqttClient
     this.onConnect()
   }
 
@@ -73,5 +76,8 @@ export class Controller {
   private async do(record: ProofRecord) {
     // TODO: trigger something
     this.logger.info('Beep: ' + record)
+    // Open door
+    this.mqttClient.publish('eno/raw/vin', 'F4 07 22 DD C4')
+
   }
 }
