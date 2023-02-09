@@ -7,6 +7,7 @@ import type { Logger, OutboundPackage } from '@aries-framework/core'
 import { didcommReadCharacteristic } from './readCharacteristic'
 import { didcommWriteCharacteristic } from './writeCharacteristic'
 
+
 export class TransportPeripheral {
   private isAdvertising: boolean;
 
@@ -18,6 +19,9 @@ export class TransportPeripheral {
   private writeCharacteristic: didcommWriteCharacteristic
 
   private logger!: Logger
+  private buffer: Buffer
+  private startTimestamp: number
+  private inboundCB: (data?: Buffer) => void
 
 
   constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void) {
@@ -25,11 +29,15 @@ export class TransportPeripheral {
     this.readCharacteristicUUID = readCharacteristic
     this.writeCharacteristicUUID = writeCharacteristic
     this.serviceUUID = serviceUUID
+    this.buffer = Buffer.from("") //16kb Size
+    this.startTimestamp = 0
+
 
     this.logger = logger
 
     this.readCharacteristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger);
-    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, inboundCB, logger);
+    this.inboundCB = inboundCB;
+    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, this.bufferedCallback, logger);
 
     this.start();
   }
@@ -45,6 +53,34 @@ export class TransportPeripheral {
       Bleno.stopAdvertising(callback);
     } else {
       callback();
+    }
+  }
+  // In case the client does not correctly use raw junked data as L2CAP defined protocol
+  public bufferedCallback(data?: Buffer){
+    if(!this.startTimestamp){
+      this.startTimestamp = new Date().getTime();
+    }
+    if(new Date().valueOf() - this.startTimestamp.valueOf() > 10000){
+      this.buffer = Buffer.from("");
+      this.startTimestamp = new Date().getTime();
+    }
+
+    if(data){
+      console.log("Data: " + data)
+      console.log("Buffer: " + this.buffer)
+      if(this.buffer){
+
+        this.buffer = Buffer.concat([this.buffer, data]);
+      } else {
+        this.buffer = data
+      }
+      try{
+        JSON.parse(this.buffer.toString())
+        this.inboundCB(this.buffer);
+        this.buffer = Buffer.from("")  // Reset
+      } catch(e) {
+
+      }
     }
   }
 
