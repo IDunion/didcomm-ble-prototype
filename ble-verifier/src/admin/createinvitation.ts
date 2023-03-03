@@ -18,7 +18,7 @@ export class AdminCreateInvitation implements AdminRoute {
   }
 
   register(express: Express) {
-    this.logger.debug('registering route for connection invitations')
+    this.logger.debug('registering route for the creation of connection invitations')
 
     express.post('/createconnection', (req: Request, res: Response) => {
       this.logger.debug('Create connection')

@@ -18,7 +18,7 @@ export class AdminReceiveInvitation implements AdminRoute {
   }
 
   register(express: Express) {
-    this.logger.debug('registering route for connection invitations')
+    this.logger.debug('registering route for the reception connection invitations')
 
     express.post('/invitation', (req: Request, res: Response) => {
       this.logger.debug('Got connection invitation')

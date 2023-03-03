@@ -37,7 +37,7 @@ export class TransportPeripheral {
 
     this.readCharacteristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger);
     this.inboundCB = inboundCB;
-    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, this.bufferedCallback, logger);
+    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, this.bufferedCallback.bind(this), logger);
 
     this.start();
   }
@@ -66,10 +66,7 @@ export class TransportPeripheral {
     }
 
     if(data){
-      console.log("Data: " + data)
-      console.log("Buffer: " + this.buffer)
       if(this.buffer){
-
         this.buffer = Buffer.concat([this.buffer, data]);
       } else {
         this.buffer = data
@@ -79,7 +76,6 @@ export class TransportPeripheral {
         this.inboundCB(this.buffer);
         this.buffer = Buffer.from("")  // Reset
       } catch(e) {
-
       }
     }
   }
