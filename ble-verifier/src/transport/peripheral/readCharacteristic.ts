@@ -18,6 +18,7 @@ export class didcommReadCharacteristic extends Characteristic {
   private _updateCB: ((data: Buffer) => void) | null
   private timeoutID: NodeJS.Timeout | undefined
   private previousOffset: number = 0
+  private weirdChunkingOffset: number = 0
   private messages: Message[];
 
   constructor(uuid: string, logger: Logger) {
@@ -44,7 +45,6 @@ export class didcommReadCharacteristic extends Characteristic {
 
   private resolve() {
     this.logger.debug('Succesfully finished read request')
-    this.logger.debug(this.resolveFunc, this.timeoutID);
     if (this.resolveFunc != null) {
       this.resolveFunc();
       this.resolveFunc = null;
@@ -57,22 +57,31 @@ export class didcommReadCharacteristic extends Characteristic {
   }
 
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
+    this.logger.debug('Requested offset: ' + offset)
+    // Offset is resetting
+    offset = offset + this.weirdChunkingOffset
     if (this.previousOffset > offset) {
-      offset = this.previousOffset
+      this.weirdChunkingOffset += 600 // Where the heck does this come from? Is there any way to identify when the offset resets to 0?
+      offset += 600
+      this.logger.debug('Adjusting offset: ' + offset)
     }
+    this.logger.debug('Working with offset: ' + offset)
 
-    this.logger.debug('Getting Read Request - offset: ' + offset)
     if (!this.value) {
       callback(Characteristic.RESULT_INVALID_OFFSET, Buffer.from(''));
       return
     }
-    callback(Characteristic.RESULT_SUCCESS, this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength)));
+    let chunk = this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength))
+    callback(Characteristic.RESULT_SUCCESS, chunk);
+    this.logger.debug('Chunk sent: ' + chunk)
     if (offset + Bleno.mtu >= this.value!.byteLength) {
       this.resolve()
+      this.weirdChunkingOffset = 0
       this.previousOffset = 0
     }
     else {
-      this.previousOffset += Bleno.mtu - 1
+      // This is the expected next offset
+      this.previousOffset = offset
     }
   }
 

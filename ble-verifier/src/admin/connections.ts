@@ -18,7 +18,7 @@ export class AdminConnections implements AdminRoute {
   }
 
   register(express: Express) {
-    this.logger.debug('registering route for connections')
+    this.logger.debug('registering route for connection invitations')
     express.get('/connections', (req: Request, res: Response) => {
       this.logger.debug('Got connections list request')
       const connectionRecords = this.agent.connections.getAll()

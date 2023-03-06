@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Agent, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, ProofAttributeInfo, DidExchangeState, AutoAcceptProof, ProofExchangeRecord } from '@aries-framework/core'
+import { Agent, ProofAttributeInfo, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, DidExchangeState, AutoAcceptProof, ProofExchangeRecord} from '@aries-framework/core'
 import { TestLogger } from '../utils/logger'
 import { ProofConfig } from './config'
 import { Client } from "mqtt"
@@ -54,7 +54,7 @@ export class Controller {
       ConnectionEventTypes.ConnectionStateChanged, (event) => {
         const record = event.payload.connectionRecord
         this.logger.debug('Connection state changed: ' + record.id + " / " + record.state)
-        if (!record.isReady && record.state != DidExchangeState.Completed) {
+        if (record.state != DidExchangeState.Completed && record.state != DidExchangeState.ResponseSent) {
           this.logger.debug('Connection not ready yet: ' + record.id + " / " + record.state)
           return
         }
@@ -62,7 +62,7 @@ export class Controller {
         this.agent.proofs.requestProof({
           connectionId: id,
           autoAcceptProof: AutoAcceptProof.Always,
-          protocolVersion: 'v1',
+          protocolVersion: 'v2',
           proofFormats: {
             indy: {
               name: 'proof-request',
@@ -70,9 +70,9 @@ export class Controller {
               requestedAttributes: this.buildProofAttributes()
             }
           }
-        }).catch((err) => {
+        }).catch((err: any) => {
           this.logger.error('Error during proof request: ' + err)
-        }).then((record) => {
+        }).then((record: any) => {
           if (record) {
             this.logger.debug('Got Proof Request: ' + record.toJSON())
             this.do(record)

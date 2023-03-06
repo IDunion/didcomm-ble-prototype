@@ -25,7 +25,7 @@ export class AdminCreateInvitation implements AdminRoute {
       this.agent.oob.createLegacyInvitation({
         autoAcceptConnection: true,
         multiUseInvitation: true,
-        label: "",
+        alias: "pireader"
       }).then(value => {
         res.status(200).send(value.invitation.toJSON())
       }).catch(record => {

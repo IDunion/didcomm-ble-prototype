@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-  Agent, AutoAcceptCredential, HttpOutboundTransport,
+  Agent, AutoAcceptCredential, DidCommMimeType, HttpOutboundTransport,
   InitConfig, LogLevel, WsOutboundTransport
 } from '@aries-framework/core'
 import { agentDependencies } from '@aries-framework/node'
@@ -110,6 +110,8 @@ const run = async () => {
     ],
     logger: logger,
     autoAcceptConnections: true,
+    useDidKeyInProtocols: false,
+    didCommMimeType: DidCommMimeType.V0,
     autoAcceptCredentials: AutoAcceptCredential.Always,
     useLegacyDidSovPrefix: true,
     // mediatorConnectionsInvite: mediatorConnectionsInvite,
