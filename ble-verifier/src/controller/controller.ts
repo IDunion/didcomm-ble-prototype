@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Agent, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, ProofAttributeInfo, ProofRecord, DidExchangeState } from '@aries-framework/core'
+import { Agent, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, ProofAttributeInfo, DidExchangeState, AutoAcceptProof, ProofExchangeRecord } from '@aries-framework/core'
 import { TestLogger } from '../utils/logger'
 import { ProofConfig } from './config'
 import { Client } from "mqtt"
@@ -59,8 +59,17 @@ export class Controller {
           return
         }
         const id = record.id
-        this.agent.proofs.requestProof(id, {
-          requestedAttributes: this.buildProofAttributes()
+        this.agent.proofs.requestProof({
+          connectionId: id,
+          autoAcceptProof: AutoAcceptProof.Always,
+          protocolVersion: 'v1',
+          proofFormats: {
+            indy: {
+              name: 'proof-request',
+              version: '1.0',
+              requestedAttributes: this.buildProofAttributes()
+            }
+          }
         }).catch((err) => {
           this.logger.error('Error during proof request: ' + err)
         }).then((record) => {
@@ -73,7 +82,7 @@ export class Controller {
     )
   }
 
-  private async do(record: ProofRecord) {
+  private async do(record: ProofExchangeRecord) {
     // TODO: trigger something
     this.logger.info('doing things: ' + record)
     // Open door

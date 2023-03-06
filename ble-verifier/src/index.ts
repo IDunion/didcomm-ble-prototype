@@ -40,7 +40,7 @@ const run = async () => {
   logger.debug('Configuratrion: ' + config)
 
   // Set genesis transaction from either genesis url, network name or default to idunion
-  let network = "idunion_test"
+  let network = "idunion:test"
   let genesisTransactions = utils.genesis.get(network)
 
   if (config.genesisurl) {
@@ -103,6 +103,7 @@ const run = async () => {
     indyLedgers: [
       {
         id: network,
+        indyNamespace: network,
         genesisTransactions: genesisTransactions,
         isProduction: false,
       },
@@ -117,7 +118,10 @@ const run = async () => {
     endpoints: ["ble://" + BLEAddress],
   }
 
-  const agent = new Agent(agentConfig, agentDependencies)
+  const agent = new Agent({
+    config: agentConfig,
+    dependencies: agentDependencies,
+  });
 
   // Default Transports
   agent.registerOutboundTransport(new HttpOutboundTransport())
