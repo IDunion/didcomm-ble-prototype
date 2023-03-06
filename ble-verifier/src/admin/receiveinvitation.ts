@@ -5,7 +5,7 @@
 import { AdminRoute } from "./route";
 import { TestLogger } from '../utils/logger'
 import type { Express, Request, Response } from 'express';
-import { Agent, HandshakeProtocol } from "@aries-framework/core";
+import { Agent } from "@aries-framework/core";
 
 
 export class AdminReceiveInvitation implements AdminRoute {

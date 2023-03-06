@@ -22,10 +22,10 @@ export class Controller {
   }
 
   private buildProofAttributes(): Map<string, ProofAttributeInfo> {
-    let proofRequestAttributes = new Map<string, ProofAttributeInfo>()
+    const proofRequestAttributes = new Map<string, ProofAttributeInfo>()
     this.proofConfig.attributes.forEach((attribute) => {
 
-      let attributeInfo = new ProofAttributeInfo({
+      const attributeInfo = new ProofAttributeInfo({
         name: attribute.name,
         restrictions: [],
       })
@@ -52,20 +52,19 @@ export class Controller {
   public onConnect() {
     this.agent.events.on<ConnectionStateChangedEvent>(
       ConnectionEventTypes.ConnectionStateChanged, (event) => {
-        let record = event.payload.connectionRecord
+        const record = event.payload.connectionRecord
         this.logger.debug('Connection state changed: ' + record.id + " / " + record.state)
         if (!record.isReady && record.state != DidExchangeState.Completed) {
           this.logger.debug('Connection not ready yet: ' + record.id + " / " + record.state)
           return
         }
-        let id = record.id
+        const id = record.id
         this.agent.proofs.requestProof(id, {
           requestedAttributes: this.buildProofAttributes()
         }).catch((err) => {
           this.logger.error('Error during proof request: ' + err)
         }).then((record) => {
           if (record) {
-            this.logger.debug('Got Proof Request: ' + record)
             this.logger.debug('Got Proof Request: ' + record.toJSON())
             this.do(record)
           }
@@ -76,9 +75,8 @@ export class Controller {
 
   private async do(record: ProofRecord) {
     // TODO: trigger something
-    this.logger.info('Beep: ' + record)
+    this.logger.info('doing things: ' + record)
     // Open door
     this.mqttClient.publish('eno/raw/vin', 'F4 07 22 DD C4')
-
   }
 }

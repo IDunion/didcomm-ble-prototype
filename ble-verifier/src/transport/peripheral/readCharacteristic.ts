@@ -66,6 +66,7 @@ export class didcommReadCharacteristic extends Characteristic {
       callback(Characteristic.RESULT_INVALID_OFFSET, Buffer.from(''));
       return
     }
+    callback(Characteristic.RESULT_SUCCESS, this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength)));
     if (offset + Bleno.mtu >= this.value!.byteLength) {
       this.resolve()
       this.previousOffset = 0
@@ -73,8 +74,6 @@ export class didcommReadCharacteristic extends Characteristic {
     else {
       this.previousOffset += Bleno.mtu - 1
     }
-
-    callback(Characteristic.RESULT_SUCCESS, this.value!.slice(offset, Math.min(offset + Bleno.mtu, this.value!.byteLength)));
   }
 
   public sendMessage(payload: string): Promise<void> {

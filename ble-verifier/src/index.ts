@@ -16,7 +16,7 @@ import { BleTransport } from './transport/BLETransport'
 import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
 import { Controller } from './controller/controller'
-import * as mqtt from "mqtt"
+import * as mqtt from 'mqtt'
 
 const logger = new TestLogger(process.env.NODE_ENV ? LogLevel.error : LogLevel.debug)
 
@@ -149,28 +149,12 @@ const run = async () => {
 
 
   // Register business logic
-  // TODO: move into config
-  new Controller(logger, agent, {
-    attributes: [{
-      name: 'car',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }, {
-      name: 'owner',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }, {
-      name: 'rights',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }, {
-      name: 'source',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }
-    ]
-  }, mqttClient)
-
+  let proof = config.proof;
+  new Controller(logger, agent, proof, mqttClient);
 
   // Admin webservice 
-  const webserver = new AdminWebServer(logger, agent)
-  await webserver.listen(8080)
+  const webserver = new AdminWebServer(logger, agent);
+  await webserver.listen(8080);
 
 }
 

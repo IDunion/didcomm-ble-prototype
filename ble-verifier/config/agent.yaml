@@ -5,3 +5,13 @@ blecharacteristiread: "e6e97879-780a-4c9b-b4e6-dcae3793a3e8"
 bleservice: "d2f195b6-2e80-4ab0-be24-32ebe761352f"
 blemode: "peripheral" # Options [both, peripheral, central]
 brokerUrl: "mqtt://192.168.178.202"
+proof:
+  attributes:
+    - name: 'car'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    - name: 'owner'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    - name: 'rights'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    - name: 'source'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'

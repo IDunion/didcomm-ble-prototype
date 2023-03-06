@@ -8,7 +8,7 @@ import { AgentConfig } from '@aries-framework/core'
 export class BLEInboundTransport implements InboundTransport {
   private agent!: Agent
   private logger!: Logger
-  private message: string = ""
+  private message = ""
 
   public async start(agent: Agent): Promise<void> {
     const agentConfig = agent.injectionContainer.resolve(AgentConfig)
