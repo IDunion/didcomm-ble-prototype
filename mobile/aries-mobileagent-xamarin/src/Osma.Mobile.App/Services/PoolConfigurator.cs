@@ -21,7 +21,8 @@ namespace Osma.Mobile.App.Services
             { "sovrin-staging", "pool_transactions_sandbox_genesis" },
             { "sovrin-live", "pool_transactions_live_genesis" },
             { "sovrin-builder", "pool_transactions_builder_genesis" },
-            { "bcovrin-test", "pool_transactions_bcovrin_test_genesis" }
+            { "bcovrin-test", "pool_transactions_bcovrin_test_genesis" },
+            { "idunion-test", "pool_transactions_idunion_test_genesis" }
         };
 
         public PoolConfigurator(
