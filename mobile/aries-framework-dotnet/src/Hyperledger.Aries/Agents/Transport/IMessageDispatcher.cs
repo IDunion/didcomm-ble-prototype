@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Hyperledger.Aries.Agents
@@ -16,6 +17,14 @@ namespace Hyperledger.Aries.Agents
         /// <param name="message">Message context to dispatch.</param>
         /// <returns>A message context.</returns>
         Task<byte[]> DispatchAsync(
+            string endpoint,
+            byte[] message);
+        
+        /// <summary>Sends a message using the dispatcher.</summary>
+        /// <param name="endpoint">Endpoint to dispatch the message to.</param>
+        /// <param name="message">Message context to dispatch.</param>
+        /// <returns>A message context.</returns>
+        Task<List<PackedMessageContext>> DispatchBleAsync(
             string endpoint,
             byte[] message);
 

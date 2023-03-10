@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Hyperledger.Aries.Features.DidExchange;
 using Hyperledger.Indy.WalletApi;
 
 namespace Hyperledger.Aries.Agents
@@ -35,5 +38,18 @@ namespace Hyperledger.Aries.Agents
         Task<MessageContext> SendReceiveAsync(Wallet wallet, AgentMessage message, string recipientKey,
             string endpointUri, string[] routingKeys = null, string senderKey = null);
 
+        /// <summary>
+        /// Sends the message and receives a response by adding return routing decorator
+        /// according to the Routing RFC.
+        /// </summary>
+        /// <param name="wallet"></param>
+        /// <param name="message"></param>
+        /// <param name="recipientKey"></param>
+        /// <param name="endpointUri"></param>
+        /// <param name="routingKeys"></param>
+        /// <param name="senderKey"></param>
+        /// <returns></returns>
+        Task<List<MessageContext>> SendReceiveListAsync(Wallet wallet, AgentMessage message, string recipientKey,
+            string endpointUri, string[] routingKeys = null, string senderKey = null);
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Hyperledger.Aries.Agents;
 using Hyperledger.Aries.Features.DidExchange;
@@ -96,6 +97,26 @@ namespace Hyperledger.Aries.Agents
                 return unpackedContext.GetMessage<T>();
             }
             throw new InvalidOperationException("Couldn't cast the message to the expexted type or response was invalid");
+        }
+        
+        /// <summary>
+        /// Sends the message and receives a response by adding return routing decorator
+        /// according to the Routing RFC.
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="wallet"></param>
+        /// <param name="message"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public static async Task<List<MessageContext>> SendReceiveListAsync(this IMessageService service, Wallet wallet, AgentMessage message, ConnectionRecord connection)
+        {
+            var routingKeys = connection.Endpoint?.Verkey != null ? connection.Endpoint.Verkey : new string[0];
+            var recipientKey = connection.TheirVk ?? connection.GetTag("InvitationKey") ?? throw new InvalidOperationException("Cannot locate a recipient key");
+
+            if (connection.Endpoint?.Uri == null)
+                throw new AriesFrameworkException(ErrorCode.A2AMessageTransmissionError, "Cannot send to connection that does not have endpoint information specified");
+
+            return await service.SendReceiveListAsync(wallet, message, recipientKey, connection.Endpoint.Uri, routingKeys, connection.MyVk);
         }
     }
 }

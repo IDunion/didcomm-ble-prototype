@@ -25,7 +25,7 @@ namespace Hyperledger.Aries.Agents
         protected readonly IEnumerable<IMessageDispatcher> MessageDispatchers;
         // ReSharper restore InconsistentNaming
         
-        private readonly BleMessageDispatcher _bleMessageDispatcher = new BleMessageDispatcher();
+        private readonly BleMessageDispatcher _bleMessageDispatcher = new();
 
         /// <summary>Initializes a new instance of the <see cref="DefaultMessageService"/> class.</summary>
         /// <param name="logger">The logger.</param>
@@ -54,6 +54,40 @@ namespace Hyperledger.Aries.Agents
             }
             
             return new UnpackedMessageContext(unpacked.Message, senderKey);
+        }
+        
+        public async Task<List<MessageContext>> SendReceiveListAsync(Wallet wallet, AgentMessage message, string recipientKey, string endpointUri,
+            string[] routingKeys = null, string senderKey = null)
+        {
+            Logger.LogInformation(LoggingEvents.SendMessage, "Recipient {0} Endpoint {1}", recipientKey,
+                endpointUri);
+
+            if (string.IsNullOrEmpty(message.Id))
+                throw new AriesFrameworkException(ErrorCode.InvalidMessage, "@id field on message must be populated");
+
+            if (string.IsNullOrEmpty(message.Type))
+                throw new AriesFrameworkException(ErrorCode.InvalidMessage, "@type field on message must be populated");
+
+            if (string.IsNullOrEmpty(endpointUri))
+                throw new ArgumentNullException(nameof(endpointUri));
+
+            var dispatcher = GetDispatcher(endpointUri);
+            
+            if (dispatcher == null)
+                throw new AriesFrameworkException(ErrorCode.A2AMessageTransmissionError, $"No registered dispatcher for transport scheme : {endpointUri}");
+
+            message.AddReturnRouting();
+            var wireMsg = await CryptoUtils.PrepareAsync(wallet, message, recipientKey, routingKeys, senderKey);
+
+            if (!dispatcher.TransportSchemes.Contains("ble")) return null;
+            
+            var packedMessageContexts = await dispatcher.DispatchBleAsync(endpointUri, wireMsg);
+            var result = new List<MessageContext>();
+            foreach (var packedMessageContext in packedMessageContexts)
+            {
+                result.Add(await UnpackAsync(wallet, packedMessageContext, senderKey));
+            }
+            return result;
         }
 
         /// <inheritdoc />

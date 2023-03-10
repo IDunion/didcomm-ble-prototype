@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
@@ -70,9 +71,13 @@ namespace Osma.Mobile.App.ViewModels.Connections
                     
                     Debug.WriteLine("Recipent Key: " + ((IndyAgentDidDocService)msg.Connection.DidDoc.Services[0]).RecipientKeys[0]);
                     
-                    var result = await _messageService.SendReceiveAsync(context.Wallet, msg, rec);
-                    var unpacked = new UnpackedMessageContext(((UnpackedMessageContext) result).GetMessageJson(), rec);
-                    await context.Agent.ProcessAsync(context, unpacked);
+                    var result = await _messageService.SendReceiveListAsync(context.Wallet, msg, rec);
+                    
+                    var unpacked1 = new UnpackedMessageContext(((UnpackedMessageContext) result.First()).GetMessageJson(), rec);
+                    await context.Agent.ProcessAsync(context, unpacked1);
+                    
+                    var unpacked2 = new UnpackedMessageContext(((UnpackedMessageContext) result[1]).GetMessageJson(), rec);
+                    await context.Agent.ProcessAsync(context, unpacked1);
                     
                     Debug.WriteLine("RESULT: " + result);
                 }

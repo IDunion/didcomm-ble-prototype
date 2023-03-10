@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -31,6 +32,11 @@ namespace Hyperledger.Aries.Agents
         }
 
         public Task<byte[]> DispatchAsync(string endpoint, byte[] msg)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<PackedMessageContext>> DispatchBleAsync(string endpoint, byte[] message)
         {
             throw new NotImplementedException();
         }
