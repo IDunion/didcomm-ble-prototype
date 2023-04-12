@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import { ProofConfig } from "../controller/config";
+
 export interface Config {
     genesisurl?: string,
     network?: string,
@@ -10,5 +12,13 @@ export interface Config {
     blecharacteristiread?: string,
     bleservice?: string,
     blemode?: string,
-    brokerUrl: string,
+    blechunkinglimit?: number
+    mqtt: MqttConfig
+    proof: ProofConfig
+}
+
+export interface MqttConfig {
+    broker: string,
+    topic: string,
+    payload?: string,
 }

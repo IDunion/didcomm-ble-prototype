@@ -5,7 +5,7 @@
 import { AdminRoute } from "./route";
 import { TestLogger } from '../utils/logger'
 import type { Express, Request, Response } from 'express';
-import { Agent, HandshakeProtocol } from "@aries-framework/core";
+import { Agent } from "@aries-framework/core";
 
 
 export class AdminReceiveInvitation implements AdminRoute {
@@ -18,7 +18,7 @@ export class AdminReceiveInvitation implements AdminRoute {
   }
 
   register(express: Express) {
-    this.logger.debug('registering route for connection invitations')
+    this.logger.debug('registering route for the reception connection invitations')
 
     express.post('/invitation', (req: Request, res: Response) => {
       this.logger.debug('Got connection invitation')

@@ -18,14 +18,14 @@ export class AdminCreateInvitation implements AdminRoute {
   }
 
   register(express: Express) {
-    this.logger.debug('registering route for connection invitations')
+    this.logger.debug('registering route for the creation of connection invitations')
 
     express.post('/createconnection', (req: Request, res: Response) => {
       this.logger.debug('Create connection')
       this.agent.oob.createLegacyInvitation({
         autoAcceptConnection: true,
         multiUseInvitation: true,
-        label: "",
+        alias: "pireader"
       }).then(value => {
         res.status(200).send(value.invitation.toJSON())
       }).catch(record => {

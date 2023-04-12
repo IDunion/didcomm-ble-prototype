@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-  Agent, AutoAcceptCredential, HttpOutboundTransport,
+  Agent, AutoAcceptCredential, DidCommMimeType, HttpOutboundTransport,
   InitConfig, LogLevel, WsOutboundTransport
 } from '@aries-framework/core'
 import { agentDependencies } from '@aries-framework/node'
@@ -16,7 +16,7 @@ import { BleTransport } from './transport/BLETransport'
 import { TestLogger } from './utils/logger'
 import * as utils from './utils/utils'
 import { Controller } from './controller/controller'
-import * as mqtt from "mqtt"
+import * as mqtt from 'mqtt'
 
 const logger = new TestLogger(process.env.NODE_ENV ? LogLevel.error : LogLevel.debug)
 
@@ -40,7 +40,7 @@ const run = async () => {
   logger.debug('Configuratrion: ' + config)
 
   // Set genesis transaction from either genesis url, network name or default to idunion
-  let network = "idunion_test"
+  let network = "idunion:test"
   let genesisTransactions = utils.genesis.get(network)
 
   if (config.genesisurl) {
@@ -88,7 +88,7 @@ const run = async () => {
       return;
     }
 
-    BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger)
+    BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger, config.blechunkinglimit)
     BLEAddress = await BLETransport.getDeviceID();
 
     logger.debug("Got BLEAddress:", BLEAddress)
@@ -103,12 +103,15 @@ const run = async () => {
     indyLedgers: [
       {
         id: network,
+        indyNamespace: network,
         genesisTransactions: genesisTransactions,
         isProduction: false,
       },
     ],
     logger: logger,
     autoAcceptConnections: true,
+    useDidKeyInProtocols: false,
+    didCommMimeType: DidCommMimeType.V0,
     autoAcceptCredentials: AutoAcceptCredential.Always,
     useLegacyDidSovPrefix: true,
     // mediatorConnectionsInvite: mediatorConnectionsInvite,
@@ -117,7 +120,10 @@ const run = async () => {
     endpoints: ["ble://" + BLEAddress],
   }
 
-  const agent = new Agent(agentConfig, agentDependencies)
+  const agent = new Agent({
+    config: agentConfig,
+    dependencies: agentDependencies,
+  });
 
   // Default Transports
   agent.registerOutboundTransport(new HttpOutboundTransport())
@@ -142,35 +148,19 @@ const run = async () => {
     reconnectPeriod: 3000,
   }
 
-  const mqttClient: mqtt.MqttClient = mqtt.connect(config.brokerUrl, mqttClientOptions)
+  const mqttClient: mqtt.MqttClient = mqtt.connect(config.mqtt.broker, mqttClientOptions)
   mqttClient.on('connect', function () {
     logger.debug("MQTT connected")
   })
 
 
   // Register business logic
-  // TODO: move into config
-  new Controller(logger, agent, {
-    attributes: [{
-      name: 'car',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }, {
-      name: 'owner',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }, {
-      name: 'rights',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }, {
-      name: 'source',
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    }
-    ]
-  }, mqttClient)
-
+  let proof = config.proof;
+  new Controller(logger, agent, proof, mqttClient, config.mqtt.topic, config.mqtt.payload);
 
   // Admin webservice 
-  const webserver = new AdminWebServer(logger, agent)
-  await webserver.listen(8080)
+  const webserver = new AdminWebServer(logger, agent);
+  await webserver.listen(8080);
 
 }
 

@@ -24,11 +24,14 @@ export class BleTransport {
   private readCharacteristic: string
   private writeCharacteristic: string
 
+  private chunkingLimit?: number
+
   public Inbound: BLEInboundTransport
   public Outbound: BLEOutboundTransport
 
 
-  constructor(mode: string, serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger) {
+
+  constructor(mode: string, serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, chunkingLimit?: number) {
     this.logger = logger
     this.serviceUUID = serviceUUID
     this.readCharacteristic = readCharacteristic
@@ -36,6 +39,8 @@ export class BleTransport {
 
     this.Inbound = new BLEInboundTransport()
     this.Outbound = new BLEOutboundTransport(this)
+
+    this.chunkingLimit = chunkingLimit
 
 
     switch (mode) {
@@ -81,7 +86,7 @@ export class BleTransport {
 
   private startPeripheral() {
     if (!this.peripheral) {
-      this.peripheral = new TransportPeripheral(this.serviceUUID, this.readCharacteristic, this.writeCharacteristic, this.logger, this.receiveMessage.bind(this));
+      this.peripheral = new TransportPeripheral(this.serviceUUID, this.readCharacteristic, this.writeCharacteristic, this.logger, this.receiveMessage.bind(this), this.chunkingLimit);
     }
   }
 

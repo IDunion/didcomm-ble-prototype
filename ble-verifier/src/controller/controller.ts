@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Agent, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, ProofAttributeInfo, ProofRecord } from '@aries-framework/core'
+import { Agent, ProofAttributeInfo, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, DidExchangeState, AutoAcceptProof, ProofExchangeRecord } from '@aries-framework/core'
 import { TestLogger } from '../utils/logger'
 import { ProofConfig } from './config'
 import { Client } from "mqtt"
@@ -12,20 +12,24 @@ export class Controller {
   private agent: Agent
   private proofConfig: ProofConfig
   private mqttClient: Client
+  private topic: string
+  private payload: string
 
-  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client) {
+  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client, topic: string, payload?: string) {
     this.logger = logger
     this.agent = agent
     this.proofConfig = proofConfig
     this.mqttClient = mqttClient
+    this.topic = topic
+    this.payload = payload ? payload : ""
     this.onConnect()
   }
 
   private buildProofAttributes(): Map<string, ProofAttributeInfo> {
-    let proofRequestAttributes = new Map<string, ProofAttributeInfo>()
+    const proofRequestAttributes = new Map<string, ProofAttributeInfo>()
     this.proofConfig.attributes.forEach((attribute) => {
 
-      let attributeInfo = new ProofAttributeInfo({
+      const attributeInfo = new ProofAttributeInfo({
         name: attribute.name,
         restrictions: [],
       })
@@ -52,20 +56,29 @@ export class Controller {
   public onConnect() {
     this.agent.events.on<ConnectionStateChangedEvent>(
       ConnectionEventTypes.ConnectionStateChanged, (event) => {
-        let record = event.payload.connectionRecord
-        if (!record.isReady) {
-          this.logger.debug('Connection not ready yet: ' + record.id)
+        const record = event.payload.connectionRecord
+        this.logger.debug('Connection state changed: ' + record.id + " / " + record.state)
+        if (record.state != DidExchangeState.Completed && record.state != DidExchangeState.ResponseSent) {
+          this.logger.debug('Connection not ready yet: ' + record.id + " / " + record.state)
           return
         }
-        let id = record.id
-
-        let req = this.agent.proofs.requestProof(id, {
-          requestedAttributes: this.buildProofAttributes()
-        }).catch((err) => {
+        const id = record.id
+        this.agent.proofs.requestProof({
+          connectionId: id,
+          autoAcceptProof: AutoAcceptProof.Always,
+          protocolVersion: 'v2',
+          proofFormats: {
+            indy: {
+              name: 'proof-request',
+              version: '1.0',
+              requestedAttributes: this.buildProofAttributes()
+            }
+          }
+        }).catch((err: Error) => {
           this.logger.error('Error during proof request: ' + err)
-        }).then((record) => {
+        }).then((record: void | ProofExchangeRecord) => {
           if (record) {
-            this.logger.debug('Got Proof Request: ' + record)
+            this.logger.debug('Got Proof Request: ' + record.toJSON())
             this.do(record)
           }
         })
@@ -73,11 +86,10 @@ export class Controller {
     )
   }
 
-  private async do(record: ProofRecord) {
+  private async do(record: ProofExchangeRecord) {
     // TODO: trigger something
-    this.logger.info('Beep: ' + record)
+    this.logger.info('doing things: ' + record)
     // Open door
-    this.mqttClient.publish('eno/raw/vin', 'F4 07 22 DD C4')
-
+    this.mqttClient.publish(this.topic, this.payload)
   }
 }

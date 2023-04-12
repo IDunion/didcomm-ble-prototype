@@ -1,7 +1,21 @@
-network: "idunion_test"
+network: "idunion:test"
 mediatorinvite: "http://mediator3.test.indiciotech.io:3000?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiYjE5YTM2ZjctZjhiZi00Mjg2LTg4ZjktODM4ZTIyZDI0ZjQxIiwgInJlY2lwaWVudEtleXMiOiBbIkU5VlhKY1pzaGlYcXFMRXd6R3RtUEpCUnBtMjl4dmJMYVpuWktTU0ZOdkE2Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAiaHR0cDovL21lZGlhdG9yMy50ZXN0LmluZGljaW90ZWNoLmlvOjMwMDAiLCAibGFiZWwiOiAiSW5kaWNpbyBQdWJsaWMgTWVkaWF0b3IifQ=="
 blecharacteristicwrite: "c3103ded-afd7-477c-b279-2ad264e20e74"
 blecharacteristiread: "e6e97879-780a-4c9b-b4e6-dcae3793a3e8"
 bleservice: "d2f195b6-2e80-4ab0-be24-32ebe761352f"
 blemode: "peripheral" # Options [both, peripheral, central]
-brokerUrl: "mqtt://192.168.178.202"
+blechunkinglimit: 600 # nokia 6.2
+mqtt:
+  broker: "mqtt://192.168.178.202"
+  topic: "topic"
+  payload: ""
+proof:
+  attributes:
+    - name: 'car'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    - name: 'owner'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    - name: 'rights'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    - name: 'source'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'

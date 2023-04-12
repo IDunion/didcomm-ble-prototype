@@ -24,7 +24,7 @@ export class TransportPeripheral {
   private inboundCB: (data?: Buffer) => void
 
 
-  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void) {
+  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void, chunkingLimit?: number) {
     this.isAdvertising = false;
     this.readCharacteristicUUID = readCharacteristic
     this.writeCharacteristicUUID = writeCharacteristic
@@ -32,12 +32,11 @@ export class TransportPeripheral {
     this.buffer = Buffer.from("") //16kb Size
     this.startTimestamp = 0
 
-
     this.logger = logger
 
-    this.readCharacteristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger);
+    this.readCharacteristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger, chunkingLimit);
     this.inboundCB = inboundCB;
-    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, this.bufferedCallback, logger);
+    this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, this.bufferedCallback.bind(this), logger);
 
     this.start();
   }
@@ -60,16 +59,14 @@ export class TransportPeripheral {
     if(!this.startTimestamp){
       this.startTimestamp = new Date().getTime();
     }
-    if(new Date().valueOf() - this.startTimestamp.valueOf() > 10000){
+    if(new Date().valueOf() - this.startTimestamp.valueOf() > 20000){
       this.buffer = Buffer.from("");
       this.startTimestamp = new Date().getTime();
+      this.logger.debug('BLE Read Timeout triggered - resetting buffer')
     }
 
     if(data){
-      console.log("Data: " + data)
-      console.log("Buffer: " + this.buffer)
       if(this.buffer){
-
         this.buffer = Buffer.concat([this.buffer, data]);
       } else {
         this.buffer = data
@@ -79,7 +76,6 @@ export class TransportPeripheral {
         this.inboundCB(this.buffer);
         this.buffer = Buffer.from("")  // Reset
       } catch(e) {
-
       }
     }
   }
