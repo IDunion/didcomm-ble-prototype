@@ -18,10 +18,11 @@ export class didcommReadCharacteristic extends Characteristic {
   private _updateCB: ((data: Buffer) => void) | null
   private timeoutID: NodeJS.Timeout | undefined
   private previousOffset: number = 0
-  private weirdChunkingOffset: number = 0
+  private chunkingOffset: number = 0
+  private chunkingLimit: number = 0
   private messages: Message[];
 
-  constructor(uuid: string, logger: Logger) {
+  constructor(uuid: string, logger: Logger, chunkingLimit?: number) {
     super({
       uuid: uuid,
       properties: ['notify', 'read'],
@@ -32,6 +33,7 @@ export class didcommReadCharacteristic extends Characteristic {
     this.timeoutID = undefined;
     this.messages = [];
     this.resolveFunc = null;
+    this.chunkingLimit = chunkingLimit ? chunkingLimit : 0
   }
 
   private setMessage(value: string): void {
@@ -59,10 +61,10 @@ export class didcommReadCharacteristic extends Characteristic {
   public onReadRequest(offset: number, callback: (result: number, data?: Buffer) => void) {
     this.logger.debug('Requested offset: ' + offset)
     // Offset is resetting
-    offset = offset + this.weirdChunkingOffset
+    offset = offset + this.chunkingOffset
     if (this.previousOffset > offset) {
-      this.weirdChunkingOffset += 600 // Where the heck does this come from? Is there any way to identify when the offset resets to 0?
-      offset += 600
+      this.chunkingOffset += this.chunkingLimit
+      offset += this.chunkingLimit
       this.logger.debug('Adjusting offset: ' + offset)
     }
     this.logger.debug('Working with offset: ' + offset)
@@ -76,7 +78,7 @@ export class didcommReadCharacteristic extends Characteristic {
     this.logger.debug('Chunk sent: ' + chunk)
     if (offset + Bleno.mtu >= this.value!.byteLength) {
       this.resolve()
-      this.weirdChunkingOffset = 0
+      this.chunkingOffset = 0
       this.previousOffset = 0
     }
     else {
@@ -99,6 +101,7 @@ export class didcommReadCharacteristic extends Characteristic {
     timeoutID = setTimeout(() => {
       this.resolveFunc = null
       this.previousOffset = 0
+      this.chunkingOffset = 0
       rej('BLE Outbound Timeout')
       this._sendMessage()
     }, 20000, 'BLE Device send timeout');

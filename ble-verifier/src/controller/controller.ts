@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Agent, ProofAttributeInfo, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, DidExchangeState, AutoAcceptProof, ProofExchangeRecord} from '@aries-framework/core'
+import { Agent, ProofAttributeInfo, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, DidExchangeState, AutoAcceptProof, ProofExchangeRecord } from '@aries-framework/core'
 import { TestLogger } from '../utils/logger'
 import { ProofConfig } from './config'
 import { Client } from "mqtt"
@@ -12,12 +12,16 @@ export class Controller {
   private agent: Agent
   private proofConfig: ProofConfig
   private mqttClient: Client
+  private topic: string
+  private payload: string
 
-  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client) {
+  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client, topic: string, payload?: string) {
     this.logger = logger
     this.agent = agent
     this.proofConfig = proofConfig
     this.mqttClient = mqttClient
+    this.topic = topic
+    this.payload = payload ? payload : ""
     this.onConnect()
   }
 
@@ -70,9 +74,9 @@ export class Controller {
               requestedAttributes: this.buildProofAttributes()
             }
           }
-        }).catch((err: any) => {
+        }).catch((err: Error) => {
           this.logger.error('Error during proof request: ' + err)
-        }).then((record: any) => {
+        }).then((record: void | ProofExchangeRecord) => {
           if (record) {
             this.logger.debug('Got Proof Request: ' + record.toJSON())
             this.do(record)
@@ -86,6 +90,6 @@ export class Controller {
     // TODO: trigger something
     this.logger.info('doing things: ' + record)
     // Open door
-    this.mqttClient.publish('eno/raw/vin', 'F4 07 22 DD C4')
+    this.mqttClient.publish(this.topic, this.payload)
   }
 }

@@ -24,7 +24,7 @@ export class TransportPeripheral {
   private inboundCB: (data?: Buffer) => void
 
 
-  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void) {
+  constructor(serviceUUID: string, readCharacteristic: string, writeCharacteristic: string, logger: Logger, inboundCB: (data?: Buffer) => void, chunkingLimit?: number) {
     this.isAdvertising = false;
     this.readCharacteristicUUID = readCharacteristic
     this.writeCharacteristicUUID = writeCharacteristic
@@ -32,10 +32,9 @@ export class TransportPeripheral {
     this.buffer = Buffer.from("") //16kb Size
     this.startTimestamp = 0
 
-
     this.logger = logger
 
-    this.readCharacteristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger);
+    this.readCharacteristic = new didcommReadCharacteristic(this.readCharacteristicUUID, logger, chunkingLimit);
     this.inboundCB = inboundCB;
     this.writeCharacteristic = new didcommWriteCharacteristic(this.writeCharacteristicUUID, this.bufferedCallback.bind(this), logger);
 

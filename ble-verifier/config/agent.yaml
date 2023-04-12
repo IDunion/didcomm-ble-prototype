@@ -4,7 +4,11 @@ blecharacteristicwrite: "c3103ded-afd7-477c-b279-2ad264e20e74"
 blecharacteristiread: "e6e97879-780a-4c9b-b4e6-dcae3793a3e8"
 bleservice: "d2f195b6-2e80-4ab0-be24-32ebe761352f"
 blemode: "peripheral" # Options [both, peripheral, central]
-brokerUrl: "mqtt://192.168.178.202"
+blechunkinglimit: 600 # nokia 6.2
+mqtt:
+  broker: "mqtt://192.168.178.202"
+  topic: "topic"
+  payload: ""
 proof:
   attributes:
     - name: 'car'

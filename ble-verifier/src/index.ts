@@ -88,7 +88,7 @@ const run = async () => {
       return;
     }
 
-    BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger)
+    BLETransport = new BleTransport(config.blemode, config.bleservice, config.blecharacteristiread, config.blecharacteristicwrite, logger, config.blechunkinglimit)
     BLEAddress = await BLETransport.getDeviceID();
 
     logger.debug("Got BLEAddress:", BLEAddress)
@@ -148,7 +148,7 @@ const run = async () => {
     reconnectPeriod: 3000,
   }
 
-  const mqttClient: mqtt.MqttClient = mqtt.connect(config.brokerUrl, mqttClientOptions)
+  const mqttClient: mqtt.MqttClient = mqtt.connect(config.mqtt.broker, mqttClientOptions)
   mqttClient.on('connect', function () {
     logger.debug("MQTT connected")
   })
@@ -156,7 +156,7 @@ const run = async () => {
 
   // Register business logic
   let proof = config.proof;
-  new Controller(logger, agent, proof, mqttClient);
+  new Controller(logger, agent, proof, mqttClient, config.mqtt.topic, config.mqtt.payload);
 
   // Admin webservice 
   const webserver = new AdminWebServer(logger, agent);

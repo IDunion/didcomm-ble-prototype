@@ -12,6 +12,13 @@ export interface Config {
     blecharacteristiread?: string,
     bleservice?: string,
     blemode?: string,
-    brokerUrl: string,
+    blechunkinglimit?: number
+    mqtt: MqttConfig
     proof: ProofConfig
+}
+
+export interface MqttConfig {
+    broker: string,
+    topic: string,
+    payload?: string,
 }
