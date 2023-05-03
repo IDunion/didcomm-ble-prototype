@@ -59,7 +59,7 @@ export class TransportPeripheral {
     if(!this.startTimestamp){
       this.startTimestamp = new Date().getTime();
     }
-    if(new Date().valueOf() - this.startTimestamp.valueOf() > 20000){
+    if(new Date().valueOf() - this.startTimestamp.valueOf() > 60000){
       this.buffer = Buffer.from("");
       this.startTimestamp = new Date().getTime();
       this.logger.debug('BLE Read Timeout triggered - resetting buffer')
@@ -74,6 +74,7 @@ export class TransportPeripheral {
       try{
         JSON.parse(this.buffer.toString())
         this.inboundCB(this.buffer);
+        this.startTimestamp = new Date().getTime();
         this.buffer = Buffer.from("")  // Reset
       } catch(e) {
       }

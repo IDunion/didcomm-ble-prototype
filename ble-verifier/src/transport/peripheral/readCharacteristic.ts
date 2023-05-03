@@ -104,7 +104,7 @@ export class didcommReadCharacteristic extends Characteristic {
       this.chunkingOffset = 0
       rej('BLE Outbound Timeout')
       this._sendMessage()
-    }, 20000, 'BLE Device send timeout');
+    }, 30000, 'BLE Device send timeout');
 
     let message = {
       payload: payload,

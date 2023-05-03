@@ -33,5 +33,22 @@ export class AdminCreateInvitation implements AdminRoute {
         res.status(400).send('Invalid invitation')
       })
     })
+
+    express.post('/createconnectionurl', (req: Request, res: Response) => {
+      this.logger.debug('Create connection')
+      this.agent.oob.createLegacyInvitation({
+        autoAcceptConnection: true,
+        multiUseInvitation: true,
+        alias: "pireader"
+      }).then(value => {
+        res.status(200).send(value.invitation.toUrl({
+          domain: "didcomm://aries_connection_invitation",
+          useLegacyDidSovPrefix: true
+        }))
+      }).catch(record => {
+        this.logger.error('Connection invitation invalid: ', record)
+        res.status(400).send('Invalid invitation')
+      })
+    })
   }
 }

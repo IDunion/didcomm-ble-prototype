@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Agent, Logger, InboundTransport, AriesFrameworkError } from '@aries-framework/core'
+import { Agent, Logger, InboundTransport, AriesFrameworkError, JsonEncoder } from '@aries-framework/core'
 
 export class BLEInboundTransport implements InboundTransport {
   private agent!: Agent
@@ -24,7 +24,10 @@ export class BLEInboundTransport implements InboundTransport {
   public async receiveMessage(data: Buffer) {
     try {
       this.message += data.toString('utf8');
-      const encryptedMessage = JSON.parse(this.message)
+      let encryptedMessage = JSON.parse(this.message)
+      if(encryptedMessage.Payload && encryptedMessage.Packed) {
+        encryptedMessage = JsonEncoder.fromBase64(encryptedMessage.Payload)
+      }
       await this.agent.receiveMessage(encryptedMessage)
       this.logger.debug("MESSAGE PROCESSED")
       this.message = ""

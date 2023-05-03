@@ -11,11 +11,5 @@ mqtt:
   payload: ""
 proof:
   attributes:
-    - name: 'car'
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    - name: 'owner'
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    - name: 'rights'
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
-    - name: 'source'
-      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:34614:1.0'
+    - name: 'First name'
+      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
