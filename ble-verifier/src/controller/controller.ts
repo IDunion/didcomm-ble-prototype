@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Agent, ProofAttributeInfo, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, DidExchangeState, AutoAcceptProof, ProofExchangeRecord } from '@aries-framework/core'
+import { Agent, ProofAttributeInfo, AttributeFilter, ConnectionEventTypes, ConnectionStateChangedEvent, DidExchangeState, AutoAcceptProof, ProofExchangeRecord, ProofEventTypes, ProofStateChangedEvent, ProofState } from '@aries-framework/core'
 import { TestLogger } from '../utils/logger'
 import { ProofConfig } from './config'
 import { Client } from "mqtt"
@@ -66,7 +66,7 @@ export class Controller {
         this.agent.proofs.requestProof({
           connectionId: id,
           autoAcceptProof: AutoAcceptProof.Always,
-          protocolVersion: 'v2',
+          protocolVersion: 'v1',
           proofFormats: {
             indy: {
               name: 'proof-request',
@@ -78,15 +78,28 @@ export class Controller {
           this.logger.error('Error during proof request: ' + err)
         }).then((record: void | ProofExchangeRecord) => {
           if (record) {
-            this.logger.debug('Got Proof Request: ' + record.toJSON())
-            this.do(record)
+            this.logger.debug('Successfuly sent request')
+
           }
         })
       }
     )
+
+    this.agent.events.on<ProofStateChangedEvent>(
+      ProofEventTypes.ProofStateChanged, (event) => {
+        this.logger.debug('got proof event: ' + event.payload.proofRecord.state)
+        if (event.payload.proofRecord.state === ProofState.PresentationReceived) {
+          this.agent.proofs.findPresentationMessage(event.payload.proofRecord.id).then((presentation) => {
+            this.logger.debug('We got this: ', presentation)
+            // TODO: figure out how to deal with the double promise
+            // TODO: How do we decode the anoncreds presentation?
+          })
+        }
+      }
+    )
   }
 
-  private async do(record: ProofExchangeRecord) {
+  private async do(record: string) {
     // TODO: trigger something
     this.logger.info('doing things: ' + record)
     // Open door
