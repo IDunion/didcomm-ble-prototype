@@ -89,10 +89,13 @@ export class Controller {
       ProofEventTypes.ProofStateChanged, (event) => {
         this.logger.debug('got proof event: ' + event.payload.proofRecord.state)
         if (event.payload.proofRecord.state === ProofState.PresentationReceived) {
-          this.agent.proofs.findPresentationMessage(event.payload.proofRecord.id).then((presentation) => {
-            this.logger.debug('We got this: ', presentation)
-            // TODO: figure out how to deal with the double promise
-            // TODO: How do we decode the anoncreds presentation?
+          this.agent.proofs.getFormatData(event.payload.proofRecord.id).then((formatData) => {
+            // we default to handle first request attribute
+            const val = formatData.presentation?.indy?.requested_proof.revealed_attrs[this.proofConfig.attributes[0].name].raw
+            if(val) {
+              this.logger.debug('value: ' + val)
+              this.do(val);
+            }
           })
         }
       }
@@ -100,7 +103,6 @@ export class Controller {
   }
 
   private async do(record: string) {
-    // TODO: trigger something
     this.logger.info('doing things: ' + record)
     // Open door
     this.mqttClient.publish(this.topic, this.payload)
