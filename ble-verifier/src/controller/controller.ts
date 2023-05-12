@@ -65,7 +65,7 @@ export class Controller {
         const id = record.id
         this.agent.proofs.requestProof({
           connectionId: id,
-          autoAcceptProof: AutoAcceptProof.Always,
+          autoAcceptProof: AutoAcceptProof.Never,
           protocolVersion: 'v1',
           proofFormats: {
             indy: {
@@ -88,7 +88,7 @@ export class Controller {
     this.agent.events.on<ProofStateChangedEvent>(
       ProofEventTypes.ProofStateChanged, (event) => {
         this.logger.debug('got proof event: ' + event.payload.proofRecord.state)
-        if (event.payload.proofRecord.state === ProofState.PresentationReceived) {
+        if (event.payload.proofRecord.state === ProofState.PresentationReceived && event.payload.proofRecord.isVerified) {
           this.agent.proofs.getFormatData(event.payload.proofRecord.id).then((formatData) => {
             // we default to handle first request attribute
             const val = formatData.presentation?.indy?.requested_proof.revealed_attrs[this.proofConfig.attributes[0].name].raw
