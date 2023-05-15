@@ -13,15 +13,13 @@ export class Controller {
   private proofConfig: ProofConfig
   private mqttClient: Client
   private topic: string
-  private payload: string
 
-  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client, topic: string, payload?: string) {
+  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client, topic: string) {
     this.logger = logger
     this.agent = agent
     this.proofConfig = proofConfig
     this.mqttClient = mqttClient
     this.topic = topic
-    this.payload = payload ? payload : ""
     this.onConnect()
   }
 
@@ -65,7 +63,7 @@ export class Controller {
         const id = record.id
         this.agent.proofs.requestProof({
           connectionId: id,
-          autoAcceptProof: AutoAcceptProof.Always,
+          autoAcceptProof: AutoAcceptProof.Never,
           protocolVersion: 'v1',
           proofFormats: {
             indy: {
@@ -88,11 +86,15 @@ export class Controller {
     this.agent.events.on<ProofStateChangedEvent>(
       ProofEventTypes.ProofStateChanged, (event) => {
         this.logger.debug('got proof event: ' + event.payload.proofRecord.state)
-        if (event.payload.proofRecord.state === ProofState.PresentationReceived) {
-          this.agent.proofs.findPresentationMessage(event.payload.proofRecord.id).then((presentation) => {
-            this.logger.debug('We got this: ', presentation)
-            // TODO: figure out how to deal with the double promise
-            // TODO: How do we decode the anoncreds presentation?
+        if (event.payload.proofRecord.state === ProofState.PresentationReceived && event.payload.proofRecord.isVerified) {
+          this.agent.proofs.getFormatData(event.payload.proofRecord.id).then((formatData) => {
+            // we default to handle first request attribute
+            const val = formatData.presentation?.indy?.requested_proof.revealed_attrs[this.proofConfig.attributes[0].name].raw
+            // this.logger.info('doing things: ', formatData.presentation?.indy?.requested_proof.revealed_attrs)
+            if(val) {
+              this.logger.debug('value: ' + val)
+              this.do(val);
+            }
           })
         }
       }
@@ -100,9 +102,8 @@ export class Controller {
   }
 
   private async do(record: string) {
-    // TODO: trigger something
     this.logger.info('doing things: ' + record)
     // Open door
-    this.mqttClient.publish(this.topic, this.payload)
+    this.mqttClient.publish(this.topic, record)
   }
 }

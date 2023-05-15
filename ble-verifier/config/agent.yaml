@@ -8,8 +8,7 @@ blechunkinglimit: 600 # nokia 6.2
 mqtt:
   broker: "mqtt://192.168.178.202"
   topic: "topic"
-  payload: ""
 proof:
   attributes:
-    - name: 'First name'
-      credDef: 'XmfRzF36ViQg8W8pHot1FQ:3:CL:11220:Base-ID'
+    - name: 'csn'
+      credDef: '54uCo3cqfvxy5anTHTCD2i:3:CL:49073:access'
