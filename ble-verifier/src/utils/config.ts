@@ -20,5 +20,4 @@ export interface Config {
 export interface MqttConfig {
     broker: string,
     topic: string,
-    payload?: string,
 }

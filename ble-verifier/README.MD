@@ -47,38 +47,54 @@ Instead of heaving both roles (peripherial and central) active at the same time 
 
 # aries-ble-poc
 ## Installation
-Setup libindy for Linux
-https://github.com/hyperledger/aries-framework-javascript/blob/main/docs/libindy/linux.md
-
-## node / yarn
-Tested with node version v16.18.0
-
-##  libindy
+Tested Environment
 ```bash
-sudo apt install libzmq3-dev libsodium-dev libssl-dev (needs to be installed even if not build on device)
+Hardware:       RaspberryPi 4 (4gb RAM)
+Distributor ID: Debian
+Description:    Debian GNU/Linux 11 (bullseye)
+Image:          Raspberry Pi OS (64-bit) Desktop
+Release:        11
+Codename:       bullseye
+node:           v14.19.1
+yarn:           v1.22.18
+Kernel:         Linux raspberrypi 5.15.32-v8+ #1642 SMP PREEMPT Mon Apr  3 17:24:16 BST 2023 aarch64 GNU/Linux
+```
+### OS Setup
+1. Get latest Raspbian Debian (desktop)
+2. Flash Image
+3. Install `node`
+4. Install `yarn`
+
+### Setup libindy for Linux
+#### Build libindy
+```bash
+# Needs to be installed even if not build on device)
+sudo apt install libzmq3-dev libsodium-dev libssl-dev 
+
 sudo apt-get install -y build-essential pkg-config cmake libssl-dev libsqlite3-dev libzmq3-dev  libncursesw5-dev
 
 git clone https://github.com/hyperledger/indy-sdk.git
 
 ​cd indy-sdk/libindy
 
-cargo build — release
+cargo build -r
 
 sudo mv ./target/release/libindy.so /usr/local/lib/libindy.so
 # Check if libindy is correct installed
 npx -p @aries-framework/node is-indy-installed
 ```
-## Activate libindy
+#### Activate libindy
 `/usr/local/lib` might not be in the library path that ldconfig uses. You can just do this:
 ```bash
 sudo ldconfig /usr/local/lib
 ```
 
-## BLE
+### BLE Setup
+#### Install dependencies
 ```bash
 sudo apt-get install bluetooth bluez libbluetooth-dev libudev-dev libusb-1.0-0-dev
 
-# Disable Bluetooth
+# Disable Bluetooth if needed
 sudo systemctl stop bluetooth (once)
 sudo systemctl disable bluetooth (persist on reboot)
 # sudo systemctl disable hciuart.service
@@ -89,7 +105,7 @@ sudo hciconfig hci0 up
 # to power Bluetooth adapter up after stopping or disabling bluetoothd.
 ```
 
-### Remove need for root / sudo
+#### Remove need for root / sudo
 ```bash
 sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
 ```
@@ -115,7 +131,7 @@ yarn start
 ```
 
 ## Running Flow
-When starting the agent a small REST interface will also be spawned for testing and initiating communication flows. The interface is available under http://xxx.xxx.xxx.xxx:8080/ with endpoints for connections, createInvitations, receiveInvitations.
+When starting the agent a small REST interface will also be spawned for testing and initiating communication flows. The interface is available under http://xxx.xxx.xxx.xxx:8080/ with endpoints for connections, createInvitations, receiveInvitations or for LISSI App based communication createconnectionurl.
 
 Start two devices one as central and another as peripherial (Setup via config/agent.yaml $blemode)
 Request Connection Invitation (peripheral)
@@ -133,6 +149,12 @@ curl -X POST -H "Content-Type: application/json" -d '{"@type":"https://didcomm.o
 
 Like written in the spec document (DIDComm over Bluetooth) the central devices starts scanning for a device mac based on the invitation and the two respective characteristics (write / read) which are defined in agent.yaml. <i>ble</i> is registered (serviceEndpoint prefix) for ble transport so the agent will use the ble transport-protocol for inbound / outbound communication. After the central device has found a device that matches the MAC and UUIDs for the characteristics it will start writing to the write characteristic on the peripheral device and subscribe for the answer on the read characteristic. The peripheral device process the incomming message and writes the answer on its read characteristic. After a successful read of the central it will wipe the content. The scenario has been successfully testet with two devices and a connection establishment communication.
 
+## LISSI Demo
+1. Use endpoint `createconnectionurl` to create a valid invitation
+2. Use a tool like `qr` to generate a qr-code and scan it with the LISSI app
+3. Accept the connection invitation in the app
+4. After establishment of a connection the peripheral device will automatically ask for a presentation request with the given `cred-def` defined in `config.yaml`
+
 # Measures
 - By testing the communication speed
    1. Receive Invitation by POST on REST endpoint
@@ -143,6 +165,7 @@ Like written in the spec document (DIDComm over Bluetooth) the central devices s
 
 # Open Points & Considerations
 - <i>Both</i> mode is currently experimental
+- Due to fixed timings in LISSI app it takes 6 seconds after a ble connect to the peripheral device before it starts reading/writing
 - Encryption of BLE connection is out of scope
 - Currently only one connection at a time is possible to handle
    - Should there be an intent from the central device beforehand that the read-characteristic will be filled with related data?

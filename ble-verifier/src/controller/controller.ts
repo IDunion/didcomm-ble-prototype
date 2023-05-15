@@ -13,15 +13,13 @@ export class Controller {
   private proofConfig: ProofConfig
   private mqttClient: Client
   private topic: string
-  private payload: string
 
-  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client, topic: string, payload?: string) {
+  constructor(logger: TestLogger, agent: Agent, proofConfig: ProofConfig, mqttClient: Client, topic: string) {
     this.logger = logger
     this.agent = agent
     this.proofConfig = proofConfig
     this.mqttClient = mqttClient
     this.topic = topic
-    this.payload = payload ? payload : ""
     this.onConnect()
   }
 
@@ -92,6 +90,7 @@ export class Controller {
           this.agent.proofs.getFormatData(event.payload.proofRecord.id).then((formatData) => {
             // we default to handle first request attribute
             const val = formatData.presentation?.indy?.requested_proof.revealed_attrs[this.proofConfig.attributes[0].name].raw
+            // this.logger.info('doing things: ', formatData.presentation?.indy?.requested_proof.revealed_attrs)
             if(val) {
               this.logger.debug('value: ' + val)
               this.do(val);
@@ -105,6 +104,6 @@ export class Controller {
   private async do(record: string) {
     this.logger.info('doing things: ' + record)
     // Open door
-    this.mqttClient.publish(this.topic, this.payload)
+    this.mqttClient.publish(this.topic, record)
   }
 }

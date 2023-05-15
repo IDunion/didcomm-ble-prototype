@@ -156,7 +156,7 @@ const run = async () => {
 
   // Register business logic
   let proof = config.proof;
-  new Controller(logger, agent, proof, mqttClient, config.mqtt.topic, config.mqtt.payload);
+  new Controller(logger, agent, proof, mqttClient, config.mqtt.topic);
 
   // Admin webservice 
   const webserver = new AdminWebServer(logger, agent);
