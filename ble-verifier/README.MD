@@ -155,6 +155,27 @@ Like written in the spec document (DIDComm over Bluetooth) the central devices s
 3. Accept the connection invitation in the app
 4. After establishment of a connection the peripheral device will automatically ask for a presentation request with the given `cred-def` defined in `config.yaml`
 
+## Example Service file for systemd
+- Node installed with nvm
+
+```bash
+[Unit]
+Description=SSI4ACCESS BLE Service
+
+[Service]
+WorkingDirectory=/home/pi/indy/didcomm-ble-prototype/ble-verifier
+User=pi
+Group=pi
+Environment=NODE_VERSION=14.19.1
+
+ExecStart=/home/pi/.nvm/nvm-exec yarn start
+
+[Install]
+WantedBy=multi-user.target
+
+/etc/systemd/system/ssi4access_ble_server.service
+```
+
 # Measures
 - By testing the communication speed
    1. Receive Invitation by POST on REST endpoint
